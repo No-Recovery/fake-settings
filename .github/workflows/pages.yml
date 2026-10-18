@@ -1,0 +1,47 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - templates/**
+      - static/**
+      - build_site.py
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build static site
+        run: python build_site.py
+
+      - name: Deploy to gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          build="$(mktemp -d)"
+          cp -r site/. "$build/"
+          cd "$build"
+          git init -q .
+          git config user.name  'github-pages'
+          git config user.email 'github-pages@users.noreply.github.com'
+          git add -A
+          tree="$(git write-tree)"
+          commit="$(git commit-tree "$tree" -m 'Deploy site')"
+          git push --force \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "${commit}:refs/heads/gh-pages"
