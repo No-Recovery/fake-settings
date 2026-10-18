@@ -1,0 +1,1482 @@
+/* ===== Reset ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    background: #000;
+}
+
+body {
+    background: #000;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+}
+
+img {
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+input,
+textarea {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button {
+    -webkit-appearance: none;
+}
+
+::selection {
+    background: rgba(0, 122, 255, 0.2);
+}
+
+/* ===== Animated Liquid Glass background ===== */
+.bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: linear-gradient(160deg, #b6dcff 0%, #d9c7ff 40%, #ffc9de 75%, #ffd9b0 100%);
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.7;
+    will-change: transform;
+}
+
+.blob.a {
+    width: 55vmax;
+    height: 55vmax;
+    top: -18vmax;
+    left: -16vmax;
+    background: radial-gradient(circle, #6fb9ff 0%, transparent 65%);
+    animation: drift 26s ease-in-out infinite alternate;
+}
+
+.blob.b {
+    width: 48vmax;
+    height: 48vmax;
+    top: 22vmax;
+    right: -22vmax;
+    background: radial-gradient(circle, #ff8fb8 0%, transparent 65%);
+    animation: drift 32s ease-in-out infinite alternate-reverse;
+}
+
+.blob.c {
+    width: 50vmax;
+    height: 50vmax;
+    bottom: -20vmax;
+    left: 12vmax;
+    background: radial-gradient(circle, #b392ff 0%, transparent 65%);
+    animation: drift 38s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(4vmax, -3vmax) scale(1.08); }
+    100% { transform: translate(-4vmax, 3vmax) scale(0.96); }
+}
+
+/* ===== Page ===== */
+.page {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: calc(env(safe-area-inset-top, 0px) + 18px) 14px calc(env(safe-area-inset-bottom, 0px) + 30px);
+    min-height: 100%;
+}
+
+/* ===== Header ===== */
+.settings-header {
+    padding: 6px 8px 14px;
+}
+
+.title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: #101014;
+    margin: 4px 4px 14px 16px;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(118, 118, 128, 0.16);
+    border-radius: 12px;
+    padding: 8px 12px;
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+}
+
+.search-icon {
+    width: 16px;
+    height: 16px;
+    color: rgba(60, 60, 67, 0.6);
+    flex-shrink: 0;
+}
+
+.search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    color: #1c1c1e;
+    min-width: 0;
+}
+
+.search input::placeholder {
+    color: rgba(60, 60, 67, 0.55);
+}
+
+/* ===== Grouped cards (Liquid Glass) ===== */
+.group {
+    background: rgba(255, 255, 255, 0.62);
+    border-radius: 24px;
+    overflow: hidden;
+    margin: 0 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 12px 32px rgba(40, 60, 120, 0.14);
+    backdrop-filter: blur(26px) saturate(190%);
+    -webkit-backdrop-filter: blur(26px) saturate(190%);
+    border: 0.5px solid rgba(255,255,255,0.7);
+}
+
+/* ===== Lowered settings header ===== */
+.view-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 52px);
+}
+
+/* ===== Hero header (like General in iOS) ===== */
+.hero-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 16px 4px;
+    margin: 0 4px;
+}
+.hero-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 17px;
+    background: rgba(120, 120, 128, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #3a3a3c;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+.hero-icon svg { color: #fff; }
+body.dark .hero-icon {
+    background: rgba(120, 120, 128, 0.32);
+    color: #fff;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+.hero-body { min-width: 0; }
+.hero-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: #101014;
+    line-height: 1.1;
+}
+.hero-sub {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #8e8e93;
+    margin-top: 3px;
+}
+body.dark .hero-title { color: #fff; }
+body.dark .hero-sub { color: #8e8e93; }
+
+/* ===== Bottom search bar ===== */
+@keyframes liquid-sheen {
+    0%   { transform: translateX(-60%) rotate(-12deg); opacity: 0.85; }
+    25%  { opacity: 1; }
+    50%  { transform: translateX(15%) rotate(-12deg); opacity: 0.95; }
+    75%  { opacity: 1; }
+    100% { transform: translateX(130%) rotate(-12deg); opacity: 0.85; }
+}
+@keyframes liquid-hue {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.home-search {
+    position: sticky;
+    bottom: 22px;
+    margin: 0;
+    padding: 6px 12px 6px;
+    background: transparent;
+}
+.search-glass {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 350px;
+    margin: 0 auto;
+    padding: 14px 12px;
+    border-radius: 27px;
+    color: #8e8e93;
+    font-size: 15px;
+    font-weight: 400;
+    overflow: hidden;
+    background: transparent;
+    border: 0.5px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+        0 0 18px rgba(255, 255, 255, 0.25) inset;
+}
+.search-glass .mglass {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+}
+.search-glass span {
+    position: relative;
+    z-index: 1;
+}
+body.dark .search-glass {
+    color: rgba(235,235,245,0.65);
+    background: transparent;
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
+/* ===== Liquid Glass (WebGL) active state =====
+   Only used when the WebGL renderer is enabled; otherwise the block above
+   IS the liquid glass. Kept for parity. */
+.search-glass.lg-active {
+    background: transparent;
+    border: 0.5px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+        0 0 18px rgba(255, 255, 255, 0.25) inset;
+    animation: none;
+}
+.search-glass.lg-active::before,
+.search-glass.lg-active::after {
+    display: none;
+}
+body.dark .search-glass.lg-active {
+    background: transparent;
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+.search-glass .lg-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.group-header {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(60, 60, 67, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 22px 20px 8px;
+}
+
+/* ===== Rows ===== */
+.row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 13px 15px;
+    min-height: 53px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+}
+
+.row:active {
+    background: rgba(0, 0, 0, 0.06);
+}
+.row.noflash:active {
+    background: transparent;
+}
+body.dark .row.noflash:active {
+    background: transparent;
+}
+
+.group .row + .row::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    right: 0;
+    top: 0;
+    height: 0.5px;
+    background: rgba(60, 60, 67, 0.29);
+}
+
+.group .row + .row:has(.icon)::before {
+    left: 58px;
+}
+
+/* ===== Icons (iOS 27 liquid-glass) ===== */
+/* ===== LOCK v21 (не менять размеры — утверждено пользователем) ===== */
+.icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: linear-gradient(145deg, rgba(150, 150, 158, 0.34), rgba(92, 92, 100, 0.28));
+    -webkit-backdrop-filter: blur(8px) saturate(160%);
+    backdrop-filter: blur(8px) saturate(160%);
+    border: 0.5px solid rgba(255, 255, 255, 0.28);
+    box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.28), inset 0 -2px 6px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Настоящие иконки (PNG из полосы) — без стеклянной подложки и размытия,
+   чтобы была видна сама картинка, а не серый контейнер */
+.icon.glassless {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+.icon.glassless .icon-img { width: 16px; height: 16px; }
+
+/* Плитки-иконки из скриншотов (страница «Основные») — квадратные PNG.
+   Показаны целиком (contain), без обрезки — иначе часть значков обрывается/исчезает. */
+.icon.pill {
+    width: 30px;
+    height: 30px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+.icon.pill .icon-img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    display: block;
+}
+
+/* ===== Hero «Основные»: короткий баннер (сплющен по высоте) + текст поверх ===== */
+.g-hero {
+    position: relative;
+    margin: 0 -14px 18px;
+    padding: 0;
+    overflow: hidden;
+    height: 150px;
+}
+.g-hero-bg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    pointer-events: none;
+}
+.g-title {
+    position: absolute;
+    left: 7.4%;
+    top: 46%;
+    margin: 0;
+    font-size: 4.6vw;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: #fff;
+    line-height: 1;
+    white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.g-sub {
+    position: absolute;
+    left: 7.6%;
+    top: 58%;
+    margin: 0;
+    padding-right: 8%;
+    font-size: 3.3vw;
+    line-height: 1.3;
+    color: #8e8e93;
+    white-space: normal;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+body.dark .g-title { color: #fff; }
+body.dark .g-sub { color: #8e8e93; }
+
+/* ===== Кнопка «ВЫКЛЮЧИТЬ» ===== */
+.shutdown-btn {
+    display: block;
+    width: 100%;
+    height: 50px;
+    border-radius: 14px;
+    border: none;
+    background: #ff3b30;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background 0.15s;
+}
+.shutdown-btn:active { background: #d9342b; }
+body.dark .shutdown-btn { background: #ff453a; }
+body.dark .shutdown-btn:active { background: #e03a30; }
+
+.sheet .btn-save.pwr-ok { background: rgba(120, 120, 128, 0.2); color: #ff3b30; }
+body.dark .sheet .btn-save.pwr-ok { background: rgba(120, 120, 128, 0.32); color: #ff453a; }
+
+body.dark .icon {
+    background: linear-gradient(145deg, rgba(150, 150, 158, 0.32), rgba(90, 90, 98, 0.28));
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.26), inset 0 -2px 6px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* iOS 27: все иконки монохромные — белый символ на сером стекле */
+body.dark .icon.c-blue,
+body.dark .icon.c-teal,
+body.dark .icon.c-green,
+body.dark .icon.c-orange,
+body.dark .icon.c-red,
+body.dark .icon.c-violet,
+body.dark .icon.c-purple,
+body.dark .icon.c-indigo,
+body.dark .icon.c-grey {
+    background: linear-gradient(145deg, rgba(150, 150, 158, 0.32), rgba(90, 90, 98, 0.28));
+}
+
+/* Символы иконок наследуют цвет (белый в тёмной, тёмный в светлой) */
+.icon svg [fill="#fff"] { fill: currentColor; }
+.icon svg [stroke="#fff"] { stroke: currentColor; }
+.icon { color: #3a3a3c; }
+body.dark .icon { color: #fff; }
+
+/* Акцентная подсветка для особых иконок (остаётся лёгкий оттенок) */
+.c-blue    { background: linear-gradient(145deg, rgba(90, 200, 250, 0.5), rgba(0, 122, 255, 0.42)); }
+.c-teal    { background: linear-gradient(145deg, rgba(150, 240, 210, 0.45), rgba(40, 190, 160, 0.42)); }
+.c-green   { background: linear-gradient(145deg, rgba(150, 240, 170, 0.45), rgba(52, 199, 89, 0.42)); }
+.c-orange  { background: linear-gradient(145deg, rgba(255, 200, 150, 0.5), rgba(255, 149, 0, 0.4)); }
+.c-red     { background: linear-gradient(145deg, rgba(255, 160, 150, 0.5), rgba(255, 59, 48, 0.4)); }
+.c-violet  { background: linear-gradient(145deg, rgba(200, 170, 255, 0.5), rgba(139, 92, 246, 0.42)); }
+.c-purple  { background: linear-gradient(145deg, rgba(200, 170, 255, 0.5), rgba(120, 90, 248, 0.42)); }
+.c-indigo  { background: linear-gradient(145deg, rgba(160, 170, 255, 0.5), rgba(94, 92, 230, 0.42)); }
+.c-grey    { background: linear-gradient(145deg, rgba(185, 185, 192, 0.4), rgba(130, 130, 138, 0.32)); }
+
+/* ===== Profile (Apple ID) ===== */
+.profile-row {
+    gap: 16px;
+    padding: 14px 15px;
+}
+
+.avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #74a9ff, #3a6df0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(0, 80, 200, 0.35);
+}
+
+.avatar svg {
+    width: 32px;
+    height: 32px;
+}
+
+.profile-row .name {
+    font-size: 19px;
+    font-weight: 800;
+    color: #101014;
+}
+
+.profile-sub {
+    font-size: 12.5px;
+    color: #007aff;
+    white-space: normal;
+}
+
+.profile-note {
+    font-size: 12.5px;
+    color: rgba(60, 60, 67, 0.7);
+    white-space: normal;
+}
+
+.group .profile-row + .row::before {
+    left: 87px;
+}
+
+/* ===== Label ===== */
+.label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+    font-size: 17px;
+    color: #101014;
+}
+
+.label .sub {
+    font-size: 13px;
+    color: rgba(60, 60, 67, 0.6);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chevron {
+    color: rgba(60, 60, 67, 0.4);
+    font-size: 20px;
+    font-weight: 300;
+    flex-shrink: 0;
+    transform: translateX(0);
+}
+
+/* ===== Value on the right (iOS Settings) ===== */
+.value {
+    color: rgba(60, 60, 67, 0.55);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+/* ===== iOS toggle switch ===== */
+.switch {
+    width: 51px;
+    height: 31px;
+    border-radius: 16px;
+    background: rgba(120, 120, 128, 0.28);
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.25s;
+}
+
+.switch .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    transition: transform 0.25s;
+}
+
+.switch.on {
+    background: #34c759;
+}
+
+.switch.pressed {
+    background: #34c759;
+}
+
+.switch.on .knob {
+    transform: translateX(20px);
+}
+
+/* ===== Liquid glass ripple on toggle press ===== */
+.switch {
+    overflow: hidden;
+}
+
+.switch .liquid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90px;
+    height: 90px;
+    margin: -45px 0 0 -45px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.32) 40%, rgba(255,255,255,0) 70%);
+    transform: scale(0.05);
+    opacity: 0.9;
+    pointer-events: none;
+    animation: liquid 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform, opacity;
+}
+
+@keyframes liquid {
+    0%   { transform: scale(0.05); opacity: 0.9; }
+    55%  { transform: scale(1.3); opacity: 0.4; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+/* Glassy knob */
+.switch .knob {
+    background: linear-gradient(180deg, #ffffff, #e7e8ee);
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 6px rgba(0,0,0,0.28);
+}
+
+.switch .knob::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    right: 4px;
+    height: 9px;
+    border-radius: 9px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0));
+}
+
+/* ===== Landing page ===== */
+.landing {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 24px);
+}
+
+.logo {
+    display: inline-block;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #101014;
+    text-decoration: none;
+    margin: 4px 6px 22px;
+}
+
+.landing-hero {
+    text-align: center;
+    padding: 18px 10px 26px;
+}
+
+.landing-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #101014;
+    line-height: 1.2;
+    letter-spacing: -0.4px;
+    margin-bottom: 14px;
+}
+
+.landing-text {
+    font-size: 17px;
+    line-height: 1.6;
+    color: rgba(28, 28, 30, 0.85);
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.landing-steps {
+    padding: 20px 18px;
+}
+
+.landing-steps h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #101014;
+    margin-bottom: 18px;
+}
+
+.steps-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.steps-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.step-num {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #101014;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 2px;
+}
+
+.step-text strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: #101014;
+}
+
+.step-text span {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(60, 60, 67, 0.75);
+}
+
+.landing-cta {
+    margin-top: 26px;
+    display: flex;
+    justify-content: center;
+}
+
+.landing-sub {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 15px;
+}
+
+.landing-sub a {
+    color: #007aff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.landing-footer {
+    text-align: center;
+    margin-top: 36px;
+    font-size: 13px;
+    color: rgba(60, 60, 67, 0.5);
+}
+
+/* ===== Guide / instruction page ===== */
+.guide-card {
+    margin-bottom: 14px;
+    padding: 18px 16px;
+}
+
+.guide-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #101014;
+    margin-bottom: 8px;
+}
+
+.guide-text {
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: rgba(28, 28, 30, 0.85);
+}
+
+.guide-steps {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(28, 28, 30, 0.85);
+}
+
+.guide-steps li {
+    margin-bottom: 8px;
+}
+
+.guide-steps li:last-child {
+    margin-bottom: 0;
+}
+
+.guide-share {
+    color: #007aff;
+    font-weight: 700;
+}
+
+.guide-cta {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-primary {
+    display: inline-block;
+    background: #007aff;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    padding: 15px 34px;
+    border-radius: 14px;
+    text-decoration: none;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0, 122, 255, 0.35);
+}
+
+.btn-primary:active {
+    background: #0066d6;
+}
+
+.footer-link {
+    text-align: center;
+    margin-top: 26px;
+    font-size: 14px;
+}
+
+.footer-link a {
+    color: #007aff;
+    text-decoration: none;
+}
+
+/* ===== Media query ===== */
+@media (max-width: 380px) {
+    .title {
+        font-size: 28px;
+    }
+    .label {
+        font-size: 15px;
+    }
+    .label .sub {
+        white-space: normal;
+    }
+}
+
+/* ===== iOS Navigation views (push / slide) ===== */
+.views {
+    position: fixed;
+    inset: 0;
+    background: #F2F2F7;
+}
+
+body.dark .views {
+    background: #000;
+}
+
+.view {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    display: none;
+    transform: translateX(0);
+    opacity: 1;
+    background: #F2F2F7;
+    transition: transform 0.34s cubic-bezier(0.32, 0.72, 0.24, 1), opacity 0.3s ease;
+    will-change: transform;
+}
+
+.view.view-top {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
+}
+
+body.dark .view {
+    background: #000;
+}
+
+.view.active {
+    display: block;
+}
+
+.view.is-leaving {
+    transform: translateX(-26%);
+    opacity: 0.55;
+}
+
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 6px) 8px 6px;
+    min-height: calc(env(safe-area-inset-top, 0px) + 56px);
+    background: rgba(248, 250, 253, 0.95);
+    border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+}
+
+.nav .back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #007aff;
+    cursor: pointer;
+    padding: 0;
+    min-width: max-content;
+    z-index: 2;
+    position: relative;
+}
+
+/* ===== Static top nav (titles stay fixed during transitions) ===== */
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 6px) 8px 6px;
+    min-height: calc(env(safe-area-inset-top, 0px) + 56px);
+    background: rgba(248, 250, 253, 0.95);
+    border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+}
+.top-nav.show {
+    display: flex;
+}
+.top-nav .nav-title {
+    position: static;
+    left: auto;
+    right: auto;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: #101014;
+    pointer-events: none;
+    padding: 0 46px;
+}
+body.dark .top-nav {
+    background: rgba(18, 18, 20, 0.95);
+    border-bottom-color: rgba(84, 84, 88, 0.25);
+}
+body.dark .top-nav .nav-title {
+    color: #f2f2f7;
+}
+.back-fixed {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 6px);
+    left: 4px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #007aff;
+    cursor: pointer;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1), visibility 0s 0.22s;
+}
+.back-fixed.show {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1), visibility 0s;
+}
+
+.glass-btn {
+    width: 44px;
+    height: 44px;
+    margin-left: -4px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: transparent;
+    border: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.glass-btn svg {
+    width: 26px;
+    height: 26px;
+    color: #007aff;
+}
+
+.glass-btn img {
+    width: 40px;
+    height: auto;
+    display: block;
+}
+
+.glass-btn.pressed {
+    background: rgba(120, 120, 128, 0.18);
+    transform: scale(0.9);
+}
+
+.glass-btn .liquid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.28) 42%, rgba(255,255,255,0) 70%);
+    transform: scale(0.05);
+    opacity: 0.9;
+    pointer-events: none;
+    animation: liquid 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform, opacity;
+}
+
+body.dark .glass-btn {
+    background: transparent;
+    border: none;
+}
+
+body.dark .glass-btn svg {
+    color: #f2f2f7;
+}
+
+body.dark .glass-btn.pressed {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.nav .back-chev { font-size: 20px; margin-right: 2px; }
+
+/* ===== Back button appear/disappear animation =====
+   Объявляется после .glass-btn, чтобы его transition не перебивал показ/скрытие */
+button.back-fixed {
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    visibility: hidden;
+    transition:
+        opacity 0.13s ease,
+        transform 0.13s cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0s 0.13s;
+}
+button.back-fixed.show {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    visibility: visible;
+    transition:
+        opacity 0.13s ease,
+        transform 0.13s cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0s;
+}
+
+.nav-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: #101014;
+    pointer-events: none;
+}
+
+.nav-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #007aff;
+    font-size: 16.5px;
+    z-index: 2;
+}
+
+.nav-nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: #101014;
+}
+
+.view-content {
+    padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 30px);
+}
+
+.view-content .group {
+    margin: 0 0 0;
+}
+
+.view-content .group + .group, .view-content .group + p.group-header {
+    margin-top: 36px;
+}
+
+.icon-custom { margin-bottom: 6px; }
+
+.btn-blue {
+    display: block;
+    width: 100%;
+    background: #007aff;
+    color: #fff;
+    border: none;
+    border-radius: 11px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 9px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn-blue:active { background: #0062cc; }
+
+.btn-plain {
+    border: none;
+    background: transparent;
+    color: #007aff;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 16px;
+}
+body.dark .btn-plain { color: #0a84ff; }
+
+/* ===== Avatar photo picker ===== */
+.ava-pick {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 50%;
+}
+.ava-pick .avatar { cursor: pointer; }
+.ava-cam {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #007aff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #fff;
+    box-sizing: content-box;
+}
+body.dark .ava-cam { border-color: #1c1c1e; }
+.ava-cam svg {
+    width: 18px;
+    height: 18px;
+    color: #fff;
+}
+.ava-hint {
+    color: #007aff;
+    font-size: 14px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+body.dark .ava-hint { color: #0a84ff; }
+
+.btn-grey {
+    display: block;
+    width: 100%;
+    background: rgba(120, 120, 128, 0.24);
+    color: #007aff;
+    border: none;
+    border-radius: 13px;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 14px;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* ===== iCloud sign-in page ===== */
+.icloud-hero {
+    text-align: center;
+    padding: 30px 20px 24px;
+}
+
+.icloud-hero .avatar {
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 16px;
+    background: rgba(120, 120, 128, 0.35);
+}
+
+.icloud-hero .avatar svg { width: 44px; height: 44px; }
+
+.icloud-hero h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #101014;
+    margin-bottom: 8px;
+}
+
+.icloud-hero p {
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgba(60, 60, 67, 0.7);
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+/* ===== iCloud login form ===== */
+.field-group {
+    padding: 10px 16px 2px;
+}
+
+.field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(60, 60, 67, 0.6);
+    margin: 6px 4px 5px;
+}
+
+.field-label.blk {
+    margin-top: 16px;
+}
+
+.field-input {
+    width: 100%;
+    font-size: 17px;
+    color: #101014;
+    background: rgba(118, 118, 128, 0.12);
+    border: 0.5px solid rgba(60, 60, 67, 0.12);
+    border-radius: 10px;
+    padding: 11px 14px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+body.dark .field-label {
+    color: rgba(235, 235, 245, 0.6);
+}
+
+body.dark .field-input {
+    color: #fff;
+    background: rgba(118, 118, 128, 0.22);
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Bottom sheet editor ===== */
+.sheet-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 40;
+}
+
+.sheet-bg.open { opacity: 1; pointer-events: auto; }
+
+.sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(250, 250, 252, 0.96);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(105%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0.24, 1);
+    z-index: 41;
+    padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
+}
+
+.sheet.open { transform: translateY(0); }
+
+.sheet-grabber {
+    width: 38px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(60, 60, 67, 0.25);
+    margin: 0 auto 14px;
+}
+
+.sheet-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #101014;
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.sheet input {
+    width: 100%;
+    border: 1px solid rgba(60, 60, 67, 0.2);
+    background: #fff;
+    border-radius: 12px;
+    padding: 13px 14px;
+    font-size: 16px;
+    color: #101014;
+    outline: none;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.sheet .sheet-btns {
+    display: flex;
+    gap: 10px;
+}
+
+.sheet .sheet-btns a {
+    flex: 1;
+    display: block;
+    text-align: center;
+    border-radius: 13px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sheet .btn-save { background: #007aff; color: #fff; }
+.sheet .btn-cancel { background: rgba(120, 120, 128, 0.2); color: #007aff; }
+
+.field-row { cursor: pointer; }
+
+/* ===== Dark theme (settings page) ===== */
+body.dark {
+    background: #000;
+}
+
+body.dark .bg {
+    background: #000;
+}
+
+body.dark .blob {
+    display: none;
+}
+
+body.dark .group {
+    background: #1C1C1E;
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+body.dark .title,
+body.dark .label,
+body.dark .profile-row .name,
+body.dark .nav-title,
+body.dark .nav-nav-title,
+body.dark .sheet-title,
+body.dark .icloud-hero h2 {
+    color: #fff;
+}
+
+body.dark .label .sub,
+body.dark .profile-sub {
+    color: rgba(235, 235, 245, 0.6);
+}
+
+body.dark .value {
+    color: rgba(235, 235, 245, 0.6);
+}
+
+body.dark .chevron {
+    color: rgba(235, 235, 245, 0.32);
+}
+
+body.dark .group-header {
+    color: rgba(235, 235, 245, 0.6);
+}
+
+body.dark .nav {
+    background: #000;
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
+}
+
+body.dark .nav .back {
+    color: #0a84ff;
+}
+
+body.dark .search {
+    background: rgba(118, 118, 128, 0.3);
+}
+
+body.dark .search input {
+    color: #fff;
+}
+
+body.dark .search input::placeholder {
+    color: rgba(235, 235, 245, 0.5);
+}
+
+body.dark .search-icon {
+    color: rgba(235, 235, 245, 0.6);
+}
+
+body.dark .row:active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .group .row + .row::before {
+    background: rgba(84, 84, 88, 0.5);
+}
+
+body.dark .switch {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+body.dark .profile-sub {
+    color: #0a84ff;
+}
+
+.icloud-hero p.icloud-mail {
+    color: rgba(60, 60, 67, 0.45);
+    font-size: 14px;
+    margin-top: -4px;
+    margin-bottom: 8px;
+}
+
+body.dark .icloud-hero p.icloud-mail {
+    color: rgba(235, 235, 245, 0.45);
+}
+
+body.dark .icloud-hero p {
+    color: rgba(235, 235, 245, 0.72);
+}
+
+body.dark .sheet {
+    background: rgba(28, 28, 30, 0.94);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.12);
+}
+
+body.dark .sheet input {
+    background: #1c1c1e;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+body.dark .sheet .btn-cancel {
+    background: rgba(120, 120, 128, 0.3);
+    color: #0a84ff;
+}
+
+body.dark .btn-blue {
+    background: #0a84ff;
+}
+
+body.dark .btn-grey {
+    background: rgba(120, 120, 128, 0.3);
+    color: #0a84ff;
+}
+
+body.dark .avatar {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Vo1dek">
+    <title>Инструкция · Vo1dek</title>
+    <link rel="apple-touch-icon" href="/static/icon.png">
+    <link rel="icon" href="/static/icon.png" type="image/png">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="bg" aria-hidden="true">
+        <div class="blob a"></div>
+        <div class="blob b"></div>
+        <div class="blob c"></div>
+    </div>
+
+    <div class="page">
+        <header class="settings-header">
+            <h1 class="title">Vo1dek</h1>
+        </header>
+
+        <section class="group guide-card">
+            <h2 class="guide-title">Что это?</h2>
+            <p class="guide-text">Это кастомные настройки для твоего iPhone. Сам изменяй все текста — всё, что ты видишь, настраивается именно под тебя.</p>
+        </section>
+
+        <section class="group guide-card">
+            <h2 class="guide-title">Как это работает</h2>
+            <p class="guide-text">Сайт-настройки выглядит как отдельное приложение на твоём iPhone. Всё, что в настройках, — это визуал: цвета, шрифты и оформление. Ничего сложного.</p>
+        </section>
+
+        <section class="group guide-card">
+            <h2 class="guide-title">Как открыть настройки</h2>
+            <ol class="guide-steps">
+                <li>Просто добавь этот сайт на рабочий стол — так он станет веб-вкладкой.</li>
+                <li>Нажми на иконку Vo1dek на рабочем столе — сразу откроются настройки.</li>
+                <li>Меняй всё так, как нравится тебе.</li>
+            </ol>
+        </section>
+
+        <section class="group guide-card">
+            <h2 class="guide-title">Как добавить на рабочий стол</h2>
+            <ol class="guide-steps">
+                <li>Нажми «Поделиться» <span class="guide-share">&#8599;</span> в браузере.</li>
+                <li>Выбери «На экран “Домой”».</li>
+                <li>Готово — на рабочем столе появится иконка Vo1dek.</li>
+            </ol>
+        </section>
+
+        <div class="guide-cta">
+            <a href="/settings" class="btn-primary">Открыть настройки</a>
+        </div>
+
+        <p class="footer-link">
+            <a href="/">На главную</a>
+        </p>
+    </div>
+
+    <script>
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            location.replace('/settings');
+        }
+    </script>
+</body>
+</html>

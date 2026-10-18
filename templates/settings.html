@@ -1,0 +1,1179 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vo1dek settings">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Vo1dek settings</title>
+    <script>
+    var UA_MODEL = {{ ua_model|tojson }};
+    // Авто-обновление при новой версии на сервере (защита от агрессивного кэша Safari)
+    (function () {
+        var BUILD = 89;
+        function check() {
+            fetch('/api/version', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+                if (j.build && j.build !== BUILD) { location.reload(true); }
+            }).catch(function () {});
+        }
+        setInterval(check, 2000);
+        check();
+    })();
+    </script>
+    <link rel="apple-touch-icon" href="/static/icon-180.png">
+    <link rel="icon" href="/static/wtf.gif" type="image/gif">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css?v=87">
+</head>
+<body>
+    <div class="bg" aria-hidden="true">
+        <div class="blob a"></div>
+        <div class="blob b"></div>
+        <div class="blob c"></div>
+    </div>
+
+    <div class="views" id="views"></div>
+    <button class="glass-btn back-fixed" id="backBtn" ontouchstart="pressBack(this)" onmousedown="pressBack(this)" onclick="pop()"><img src="/static/back_btn.png" alt="Назад"></button>
+    <div class="top-nav" id="topNav"><div class="nav-title" id="topNavTitle"></div></div>
+
+    <div class="sheet-bg" id="sheetBg" onclick="closeSheet()"></div>
+    <div class="sheet" id="sheet">
+        <div class="sheet-grabber"></div>
+        <div class="sheet-title" id="sheetTitle">Название iPhone</div>
+        <input id="sheetInput" type="text" autocapitalize="off" autocomplete="off" maxlength="40">
+        <div class="sheet-btns">
+            <a class="btn-cancel" onclick="closeSheet()">Отмена</a>
+            <a class="btn-save" onclick="saveSheet()">Сохранить</a>
+        </div>
+    </div>
+
+    <div class="sheet-bg" id="powerBg" onclick="closePower()"></div>
+    <div class="sheet" id="powsheet">
+        <div class="sheet-grabber"></div>
+        <div class="sheet-title">Выключить?</div>
+        <div class="sheet-btns">
+            <a class="btn-cancel" onclick="closePower()">Отмена</a>
+            <a class="btn-save pwr-ok" onclick="togglePower()">Выключить</a>
+        </div>
+    </div>
+
+    <script>
+    // ===================== STATE =====================
+    var S = {
+        name: 'iPhone', serial: 'F8TP0HG1VPD3', model: 'iPhone 17 Pro',
+        ios: 'iOS 27.1.2', mnum: 'MQ8E3LL/A', accent: 'Синий', signed: false,
+        cap: { songs: '2,3 ГБ', videos: '1,1 ГБ', photos: '3,4 ГБ', apps: '6,2', total: '256 ГБ', free: '243 ГБ' },
+        email: '', nick: '', avatar: '',
+        ap: false, wifi: false, bt: false, cell: false, vpn: false, dark: true,
+        extra: {}
+    };
+    function loadS() { try { var s = JSON.parse(localStorage.getItem('vo_s')); if (s) { for (var k in s) S[k] = s[k]; } } catch (e) {} }
+    function saveS() { try { localStorage.setItem('vo_s', JSON.stringify(S)); } catch (e) {} }
+    loadS();
+    function applyDark() {
+        document.body.classList.toggle('dark', !!S.dark);
+        document.documentElement.style.background = S.dark ? '#000' : '#fff';
+    }
+    function toggleDark() {
+        S.dark = !S.dark; saveS(); applyDark();
+        var el = document.getElementById('darkSw');
+        if (el) { el.classList.toggle('on', S.dark); liquid(el); }
+    }
+applyDark();
+
+    // ===================== AUTO-DETECT MODEL =====================
+    function isModelStub(v) {
+        return v === 'iPhone 17 Pro' || v === 'Android' || v === 'K' || /Build\//.test(v || '') || !v;
+    }
+    function detectDeviceModel() {
+        var ua = navigator.userAgent || '';
+        if (/iPhone/.test(ua)) return 'iPhone';
+        if (/iPad/.test(ua)) return 'iPad';
+        if (/iPod/.test(ua)) return 'iPod touch';
+        if (/Android/.test(ua)) {
+            var a = ua.match(/Android [\d.]+;\s*([^;()]+)/);
+            var mm = a && a[1] && a[1].trim();
+            if (mm) mm = mm.split(/\s+Build\b/i)[0].trim();
+            if (mm && mm.length > 1 && mm !== 'K') return mm;
+            return '';
+        }
+        return '';
+    }
+    function autoDetectModel() {
+        // Заполняется реальной моделью устройства, пока значение — заглушка (дефолт/«K»/«Android»).
+        // Если пользователь поменял «Название модели» вручную — его значение сохраняется.
+        if (isModelStub(S.model)) {
+            // 1) Модель от сервера (Sec-CH-UA-Model) — самый надёжный источник на Android Chrome
+            var m = (UA_MODEL && UA_MODEL !== 'K') ? UA_MODEL : (detectDeviceModel() || '');
+            if (m) { S.model = m; saveS(); }
+        }
+        // Точную модель Android-браузера можно получить только методом high-entropy
+        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues && /Android/.test(navigator.userAgent || '')) {
+            try {
+                navigator.userAgentData.getHighEntropyValues(['model']).then(function (res) {
+                    var exact = (res && res.model || '').trim();
+                    if (exact && exact !== 'iPhone' && exact !== 'K' && exact.length > 1 && isModelStub(S.model)) {
+                        S.model = exact; saveS(); refreshViews();
+                    }
+                });
+            } catch (e) {}
+        }
+    }
+    autoDetectModel();
+
+    // ===================== ICONS =====================
+    var IC = {
+        airplane: '/static/icons_b64/airplane.png',
+        wifi: '/static/icons_b64/wifi.png',
+        bt: '/static/icons_b64/bt.png',
+        signal: '/static/icons_b64/signal.png',
+        bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/>',
+        speaker: '<rect x="4" y="9" width="4" height="6" rx="1"/><path d="M8 9l5-4v14L8 15"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/>',
+        moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+        hourglass: '<path d="M7 3h10M7 21h10M7 3c0 5.5 3.5 6.5 5 9 1.5-2.5 5-3.5 5-9M7 21c0-5.5 3.5-6.5 5-9 1.5 2.5 5 3.5 5 9"/>',
+        gear: '<circle cx="12" cy="12" r="3"/><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>',
+        sliders: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+        sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+        image: '<rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="9" cy="9.5" r="1.6"/><path d="m5 19 5-6 3 4 2.5-3L21 17"/>',
+        siri: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.5 5.8 3.5 9S14.5 18.5 12 21M12 3c-2.5 2.5-3.5 5.8-3.5 9S9.5 18.5 12 21"/>',
+        faceid: '<rect x="4" y="4" width="16" height="16" rx="5"/><path d="M8.5 10.5V9.3M15.5 10.5V9.3M9.5 15s1 1.5 2.5 1.5 2.5-1.5 2.5-1.5M12 5.5v3"/>',
+        sos: '<rect x="3.5" y="4" width="17" height="16" rx="5"/><path d="M9 12h6M12 9v6"/>',
+        battery: '/static/icons_b64/battery.png',
+        lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.3" fill="#fff" stroke="none"/>',
+        apps: '<path d="M12 3 20 21h-3.5L12 10 7.5 21H4Z" fill="#fff" stroke="none"/><path d="M8.5 15h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
+        wallet: '<rect x="2.5" y="6" width="19" height="13" rx="3"/><path d="M2.5 10h19"/><rect x="16" y="13" width="4" height="2.5" rx="1" fill="#fff" stroke="none" opacity=".4"/>',
+        gamepad: '<rect x="2.5" y="8" width="19" height="9" rx="4.5"/><path d="M7 11v4M5 13h4"/><circle cx="16" cy="11.5" r=".9" fill="#fff" stroke="none"/><circle cx="18.5" cy="13.5" r=".9" fill="#fff" stroke="none"/>',
+        pencil: '<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+        person: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.2-6 8-6s6.8 2 8 6"/>',
+        chev: '<path d="m9 5 7 7-7 7" fill="none" stroke="#fff" stroke-width="3"/>',
+        globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>',
+        cloud: '<path d="M7 18a4.5 4.5 0 1 1 .9-8.9A6 6 0 0 1 19.4 9 4.5 4.5 0 0 1 18 18z"/>',
+        speedo: '<circle cx="12" cy="13" r="9"/><path d="M12 13 16.5 7.5"/><path d="M8.5 8.5 12 13"/>',
+        hotspot: '/static/icons_b64/hotspot.png',
+        vpn: '/static/icons_b64/vpn.png',
+        search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
+        grid: '<g fill="#fff"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></g>',
+        camera: '<path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="3.5"/>',
+        wrench: '<path d="M14.7 6.3a4.4 4.4 0 0 0-5.9 5.7L3 17.8V21h3.2l5.8-5.8a4.4 4.4 0 0 0 5.7-5.9l-2.6 2.6-3.1-3.1z"/>',
+        airdrop: '<path d="M12 16.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M8.4 12.5a5 5 0 0 1 7.2 0"/><path d="M5.8 9.9a9 9 0 0 1 12.4 0"/><path d="M3 7.3a13 13 0 0 1 18 0"/>',
+        info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>',
+        processor: '<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/><rect x="10" y="10" width="4" height="4" rx="1" fill="#fff" stroke="none"/>',
+        phone: '<path d="M6.6 3.5c.6.1 2.9 1.3 3.4 2 .4.6.2 1.7-.3 2.4-.3.5-.9.9-.7 1.4.3.8 2.5 3.5 3.7 4.2.5.3 1.1.3 1.6-.2.6-.6 1.1-1.3 1.7-1 1.6.5 3.9 2 4.3 2.6.4.6-.1 1-.2 1.3-.4.7-2.4 2.6-3.4 2.6-1.4 0-6.3-3-9.9-9.7-.8-1.6-.5-4.2.1-5.3.2-.4 1.2-1 1.5-1.3z"/>',
+        sim: '<rect x="7" y="3" width="10" height="18" rx="2.5"/><circle cx="12" cy="17" r="1" fill="#fff" stroke="none"/><path d="M9.5 7h5"/>',
+        bluetooth: '<path d="m7 7 10 10-5 5V2l5 5L7 17"/>',
+        code: '<path d="m8 8-4 4 4 4M16 8l4 4-4 4M13 5l-2 14"/>',
+        rotate: '<path d="M4 12a8 8 0 0 1 14.5-4.5L20 9M20 4v5h-5"/><path d="M20 12a8 8 0 0 1-14.5 4.5L4 15M4 20v-5h5"/>',
+        flag: '<path d="M5 21V4"/><path d="M5 4c4-2.5 7 2 11 0v7c-4 2-7-2.5-11 0"/>',
+        shield: '<path d="M12 3 20 6v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
+        globe2: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>',
+        calendar: '<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 9h18"/>',
+        trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+        logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+        car: '<rect x="3" y="6" width="18" height="11" rx="3"/><path d="M6 17v2M18 17v2M7 11h1.6M13 11h4"/><circle cx="7.5" cy="14" r="1" fill="#fff" stroke="none"/><circle cx="16.5" cy="14" r="1" fill="#fff" stroke="none"/>',
+        keyboard: '<rect x="3" y="7" width="18" height="10" rx="2.5"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13h.01M9.5 13h.01M13 13h.01M16.5 13h.01M7.5 15.5h9"/>',
+        book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13v4H6a2 2 0 0 1-2-2z"/><path d="M8 7h7M8 10.5h5"/>',
+        font: '<text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" stroke="none">Aa</text>',
+        box: '<rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/>',
+        reset: '<path d="M4 12a8 8 0 1 1 2.5 5.9"/><path d="M4 8v4h4"/>',
+        clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+        arrow: '<path d="M6 8a8 8 0 1 1-2 5"/>'
+    };
+
+    IC.g2 = '/static/icons_b64/g2.png';
+    IC.u2 = '/static/icons_b64/u2.png';
+    IC.cam2 = '/static/icons_b64/cam2.png';
+    IC.act2 = '/static/icons_b64/act2.png';
+    IC.o2 = '/static/icons_b64/o2.png';
+    IC.sk2 = '/static/icons_b64/sk2.png';
+    IC.search2 = '/static/icons_b64/search2.png';
+    IC.ui2 = '/static/icons_b64/ui2.png';
+    IC.ac2 = '/static/icons_b64/ac2.png';
+    IC.siri2 = '/static/icons_b64/siri2.png';
+    IC.general2 = '/static/icons_b64/general2.png';
+    IC.access2 = '/static/icons_b64/access2.png';
+    // Иконки страницы «Основные» — плитки PNG, извлечённые из скриншота
+    IC.g_about = '/static/icons3/about.png';
+    IC.g_update = '/static/icons3/update.png';
+    IC.g_storage = '/static/icons3/storage.png';
+    IC.g_applecare = '/static/icons3/applecare.png';
+    IC.g_airdrop = '/static/icons3/airdrop.png';
+    IC.g_airplay = '/static/icons3/airplay.png';
+    IC.g_pip = '/static/icons3/pip.png';
+    IC.g_screenrec = '/static/icons3/screenrec.png';
+    IC.g_carplay = '/static/icons3/carplay.png';
+    IC.g_autofill = '/static/icons3/autofill.png';
+    IC.g_datetime = '/static/icons3/datetime.png';
+    IC.g_keyboard = '/static/icons3/keyboard.png';
+    IC.g_content = '/static/icons3/content.png';
+    IC.g_dict = '/static/icons3/dict.png';
+    IC.g_fonts = '/static/icons3/fonts.png';
+    IC.g_lang = '/static/icons3/lang.png';
+    IC.g_carrier = '/static/icons3/carrier.png';
+    IC.g_vpndev = '/static/icons3/vpndev.png';
+    IC.g_legal = '/static/icons3/legal.png';
+    IC.g_reset = '/static/icons3/reset.png';
+
+    function ic(name, cls, imgCls) {
+        var v = IC[name] || '';
+        if (v.charAt(0) === '/') {
+            var imgc = imgCls ? ' ' + imgCls : '';
+            return '<div class="icon ' + (cls || 'glassless') + '"><img class="icon-img' + imgc + '" src="' + v + '" alt=""></div>';
+        }
+        if (v.indexOf('data:image') === 0) {
+            return '<div class="icon glassless"><img class="icon-img' + (imgCls ? ' ' + imgCls : '') + '" src="' + v + '" alt=""></div>';
+        }
+        return '<div class="icon ' + (cls || 'c-grey') + '"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + v + '</svg></div>';
+    }
+
+    // ===================== HELPERS =====================
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function sw(key) { return '<span class="switch' + (S[key] ? ' on' : '') + '" ontouchstart="pressSw(this)" onmousedown="pressSw(this)" onclick="event.stopPropagation();toggleSw(\'' + key + '\')"><span class="knob"></span></span>'; }
+    function toggleSw(key) { S[key] = !S[key]; saveS(); toggleNow(event.currentTarget, S[key]); }
+
+    function ksw(key, on) {
+        if (S.extra[key] === undefined) { S.extra[key] = !!on; }
+        return '<span class="switch' + (S.extra[key] ? ' on' : '') + '" ontouchstart="pressSw(this)" onmousedown="pressSw(this)" onclick="event.stopPropagation();toggleKey(\'' + key + '\')"><span class="knob"></span></span>';
+    }
+    function toggleKey(key) { S.extra[key] = !S.extra[key]; saveS(); toggleNow(event.currentTarget, S.extra[key]); }
+
+    function toggleNow(el, on) {
+        if (el) { el.classList.toggle('on', on); liquid(el); }
+    }
+    function pressSw(el) {
+        if (!el) return;
+        el.classList.add('pressed');
+        liquid(el);
+        setTimeout(function () { el.classList.remove('pressed'); }, 320);
+    }
+    function liquid(el) {
+        if (!el) return;
+        var s = document.createElement('span');
+        s.className = 'liquid';
+        el.appendChild(s);
+        setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 650);
+    }
+
+    function pressBack(el) {
+        if (!el) return;
+        el.classList.add('pressed');
+        liquid(el);
+        setTimeout(function () { el.classList.remove('pressed'); }, 320);
+    }
+
+    function row(opts) {
+        var html = '<div class="row"' + (opts.href ? ' onclick="push(\'' + opts.href + '\')"' : opts.on ? ' onclick="' + opts.on + '"' : '') + '">';
+        if (opts.icon !== false) html += ic(opts.icon || 'gear', opts.cls || 'c-blue', opts.imgcls);
+        html += '<div class="label"><span>' + esc(opts.t) + '</span>' + (opts.sub ? '<span class="sub">' + esc(opts.sub) + '</span>' : '') + '</div>';
+        if (opts.val) html += '<span class="value">' + esc(opts.val) + '</span>';
+        if (opts.switch) html += sw(opts.switch);
+        if (opts.ksw) html += ksw(opts.ksw[0], opts.ksw[1]);
+        if (opts.href || opts.on) html += '<span class="chevron">&#8250;</span>';
+        html += '</div>';
+        return html;
+    }
+
+    function group(header, rowsHtml) {
+        return (header ? '<p class="group-header">' + header + '</p><section class="group">' + rowsHtml + '</section>' : '<section class="group">' + rowsHtml + '</section>');
+    }
+
+    var VALUES = {
+        wifi: true, bt: true
+    };
+
+    // ===================== NAVIGATION =====================
+    var stack = ['main'];
+    var animating = false;
+    var navTimer = null;
+
+    function pageHTML(id) {
+        var p = PAGES[id];
+        var body = p.body();
+        if (id === 'main') {
+            return '<div class="view active" id="v-main">' + body + '</div>';
+        }
+        return '<div class="view view-top" id="v-' + id + '"><div class="view-content">' + body + '</div></div>';
+    }
+
+    function buildAll() {
+        var v = document.getElementById('views');
+        v.innerHTML = '';
+        for (var id in PAGES) {
+            var sc = document.createElement('div');
+            sc.innerHTML = pageHTML(id);
+            v.appendChild(sc.firstChild);
+        }
+        var last = document.getElementById('v-main');
+        if (last && !last.classList.contains('active')) last.classList.add('active');
+    }
+
+    // Перерисовать значения на всех страницах без навигации
+    function refreshViews() {
+        for (var id in PAGES) {
+            var v = document.getElementById('v-' + id);
+            if (!v) continue;
+            if (id === 'main') {
+                v.innerHTML = PAGES.main.body();
+            } else {
+                var vc = v.querySelector('.view-content');
+                if (vc) vc.innerHTML = PAGES[id].body();
+            }
+        }
+    }
+
+    // Очистить инлайн-стили, оставшиеся после анимаций (display не трогаем — видимость только через .active)
+    function resetViewStyles(el) {
+        if (!el) return;
+        el.style.transition = '';
+        el.style.transform = '';
+        el.style.opacity = '';
+        el.style.zIndex = '';
+    }
+
+    // Показать один экран, скрыть остальные (видимость управляется ТОЛЬКО классом .active)
+    function showOnly(id) {
+        for (var key in PAGES) {
+            var v = document.getElementById('v-' + key);
+            if (!v) continue;
+            v.style.display = '';
+            v.style.transition = '';
+            v.style.transform = '';
+            v.style.opacity = '';
+            v.style.zIndex = '';
+            if (key === id) v.classList.add('active');
+            else v.classList.remove('active');
+        }
+    }
+
+    // Надёжный сброс флага анимации (даже если таймер потерян)
+    function clearNav() {
+        if (navTimer) { clearTimeout(navTimer); navTimer = null; }
+        animating = false;
+    }
+
+    // Единая кнопка назад: видна только если стек глубже главного экрана
+    function updateBackBtn() {
+        var b = document.getElementById('backBtn');
+        var show = stack.length > 1;
+        if (b) {
+            if (show) b.classList.add('show');
+            else b.classList.remove('show');
+            b.setAttribute('aria-hidden', show ? 'false' : 'true');
+        }
+        var tn = document.getElementById('topNav');
+        if (tn) {
+            tn.classList.toggle('show', show);
+            if (show) {
+                var cur = stack[stack.length - 1];
+                var p = PAGES[cur];
+                var tt = document.getElementById('topNavTitle');
+                if (tt && p) tt.textContent = p.title;
+            }
+        }
+    }
+
+    function show(id) {
+        if (animating) return false;
+        animating = true;
+        var cur = document.getElementById('v-' + stack[stack.length - 1]);
+        var next = document.getElementById('v-' + id);
+        if (!cur || !next) { animating = false; return false; }
+        var tn = document.getElementById('topNav');
+        if (tn) {
+            tn.classList.add('show');
+            var tt = document.getElementById('topNavTitle');
+            var p = PAGES[id];
+            if (tt && p) tt.textContent = p.title;
+        }
+        // Новый экран едет справа поверх, старая вкладка уезжает влево на 50%
+        cur.classList.add('active');
+        cur.style.display = 'block';
+        cur.style.transition = 'none';
+        cur.style.transform = 'translateX(0)';
+        cur.style.zIndex = 1;
+        next.classList.add('active');
+        next.style.display = 'block';
+        next.style.transition = 'none';
+        next.style.transform = 'translateX(100%)';
+        next.style.zIndex = 2;
+        void next.offsetWidth;
+        cur.style.transition = 'transform 0.45s cubic-bezier(0.32,0.72,0.24,1)';
+        cur.style.transform = 'translateX(-50%)';
+        next.style.transition = 'transform 0.45s cubic-bezier(0.32,0.72,0.24,1)';
+        next.style.transform = 'translateX(0)';
+        navTimer = setTimeout(function () {
+            cur.classList.remove('active');
+            resetViewStyles(cur);
+            cur.style.display = '';
+            stack.push(id);
+            clearNav();
+            updateBackBtn();
+        }, 460);
+        return true;
+    }
+
+    function push(id) {
+        // Не пушить дубликаты: если id уже есть в стеке, вернуться к нему
+        var idx = -1;
+        for (var i = 0; i < stack.length; i++) {
+            if (stack[i] === id) { idx = i; break; }
+        }
+        if (idx !== -1) {
+            // Уже в этом экране — ничего не делаем
+            if (idx === stack.length - 1) return;
+            // иначе — откатиться назад до него
+            popTo(idx);
+            return;
+        }
+        if (id === 'custom') {
+            var cv = document.getElementById('v-custom');
+            if (cv) cv.querySelector('.view-content').innerHTML = PAGES.custom.body();
+        }
+        show(id);
+    }
+
+    function popTo(idx) {
+        if (animating) return;
+        animating = true;
+        // Откатить стек до позиции idx и показать соответствующий экран
+        var target = stack[idx];
+        var cur = document.getElementById('v-' + (stack[stack.length - 1]));
+        var nx = document.getElementById('v-' + target);
+        if (!cur || !nx) { clearNav(); stack.length = idx + 1; updateBackBtn(); return; }
+        var tn = document.getElementById('topNav');
+        if (tn) {
+            tn.classList.add('show');
+            var tt = document.getElementById('topNavTitle');
+            var p = PAGES[target];
+            if (tt && p) tt.textContent = p.title;
+        }
+        cur.classList.add('active');
+        cur.style.display = 'block';
+        cur.style.transition = 'none';
+        cur.style.transform = 'translateX(0)';
+        cur.style.opacity = '1';
+        cur.style.zIndex = 2;
+        nx.classList.add('active');
+        nx.style.display = 'block';
+        nx.style.transition = 'none';
+        nx.style.transform = 'translateX(-50%)';
+        nx.style.opacity = '1';
+        nx.style.zIndex = 1;
+        void cur.offsetWidth;
+        cur.style.transition = 'transform 0.45s cubic-bezier(0.32,0.72,0.24,1)';
+        cur.style.transform = 'translateX(100%)';
+        nx.style.transition = 'transform 0.45s cubic-bezier(0.32,0.72,0.24,1)';
+        nx.style.transform = 'translateX(0)';
+        navTimer = setTimeout(function () {
+            resetViewStyles(cur);
+            cur.classList.remove('active');
+            nx.classList.add('active');
+            cur.style.display = '';
+            nx.style.display = '';
+            stack.length = idx + 1;
+            clearNav();
+            updateBackBtn();
+        }, 460);
+    }
+
+    var homeTaps = 0, homeTimer = null;
+    function homeTap() {
+        homeTaps++;
+        if (homeTaps === 1) {
+            homeTimer = setTimeout(function () { homeTaps = 0; }, 350);
+        } else {
+            clearTimeout(homeTimer); homeTaps = 0;
+            push('custom');
+        }
+    }
+
+    function pop() {
+        if (animating) return;
+        if (stack.length <= 1) { updateBackBtn(); return; }
+        animating = true;
+        var curTop = stack[stack.length - 1];
+        var prev = stack[stack.length - 2];
+        var cur = document.getElementById('v-' + curTop);
+        var nx = document.getElementById('v-' + prev);
+        if (!cur || !nx) { clearNav(); updateBackBtn(); return; }
+        var tn = document.getElementById('topNav');
+        if (tn) {
+            tn.classList.add('show');
+            var tt = document.getElementById('topNavTitle');
+            var p = PAGES[prev];
+            if (tt && p) tt.textContent = p.title;
+        }
+        cur.style.transition = 'none';
+        cur.style.transform = 'translateX(0)';
+        cur.style.opacity = '1';
+        cur.classList.add('active');
+        cur.style.display = 'block';
+        cur.style.zIndex = 2;
+        nx.classList.add('active');
+        nx.style.display = 'block';
+        nx.style.transition = 'none';
+        nx.style.transform = 'translateX(-50%)';
+        nx.style.opacity = '1';
+        nx.style.zIndex = 1;
+        void cur.offsetWidth;
+        cur.style.transition = 'transform 0.45s cubic-bezier(0.32,0.72,0.24,1)';
+        cur.style.transform = 'translateX(100%)';
+        nx.style.transition = 'transform 0.45s cubic-bezier(0.32,0.72,0.24,1)';
+        nx.style.transform = 'translateX(0)';
+        navTimer = setTimeout(function () {
+            resetViewStyles(cur);
+            cur.classList.remove('active');
+            nx.classList.add('active');
+            cur.style.display = '';
+            nx.style.display = '';
+            stack.pop();
+            clearNav();
+            updateBackBtn();
+        }, 460);
+    }
+
+    // ===================== TOGGLE MODEL NUM =====================
+    function toggleMnum() {
+        S.mnum = S.mnum === 'MQ8E3LL/A' ? 'A2848' : 'MQ8E3LL/A';
+        saveS();
+        var el = document.getElementById('aboutMnum');
+        if (el) el.textContent = S.mnum;
+    }
+
+    // ===================== SHEET (editor) =====================
+    var sheetKey = '';
+    function openSheet(key, title, val) {
+        sheetKey = key;
+        document.getElementById('sheetTitle').textContent = title;
+        document.getElementById('sheetInput').value = val || '';
+        document.getElementById('sheet').classList.add('open');
+        document.getElementById('sheetBg').classList.add('open');
+        setTimeout(function () { document.getElementById('sheetInput').focus(); }, 350);
+    }
+    function closeSheet() {
+        document.getElementById('sheet').classList.remove('open');
+        document.getElementById('sheetBg').classList.remove('open');
+    }
+    function openPower() {
+        document.getElementById('powsheet').classList.add('open');
+        document.getElementById('powerBg').classList.add('open');
+    }
+    function closePower() {
+        document.getElementById('powsheet').classList.remove('open');
+        document.getElementById('powerBg').classList.remove('open');
+    }
+    function togglePower() {
+        closePower();
+        if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+            try { window.close(); } catch (e) {}
+        }
+    }
+    function saveSheet() {
+        var val = document.getElementById('sheetInput').value.trim();
+        if (sheetKey === 'name') S.name = val || 'iPhone';
+        if (sheetKey === 'serial') S.serial = val || 'F8TP0HG1VPD3';
+        if (sheetKey === 'model') S.model = val || 'iPhone 17 Pro';
+        if (sheetKey === 'ios') S.ios = val || 'iOS 27.1.2';
+        if (sheetKey === 'cap.songs') S.cap.songs = val || '0 ГБ';
+        if (sheetKey === 'cap.videos') S.cap.videos = val || '0 ГБ';
+        if (sheetKey === 'cap.photos') S.cap.photos = val || '0 ГБ';
+        if (sheetKey === 'cap.apps') S.cap.apps = val || '0';
+        if (sheetKey === 'cap.total') S.cap.total = val || '256 ГБ';
+        if (sheetKey === 'cap.free') S.cap.free = val || '0 ГБ';
+        saveS();
+        closeSheet();
+        refreshViews();
+    }
+
+    function accentColor(name) {
+        var map = { 'Синий': '#007aff', 'Зелёный': '#34c759', 'Фиолетовый': '#af52de', 'Оранжевый': '#ff9500', 'Розовый': '#ff2d55', 'Голубой': '#5ac8fa' };
+        return map[name] || '#007aff';
+    }
+    function pickAccent(name) {
+        S.accent = name; saveS();
+        document.getElementById('accentVal').textContent = name;
+        var cs = document.querySelectorAll('#v-custom .acc');
+        for (var i = 0; i < cs.length; i++) cs[i].style.outline = (cs[i].dataset.c === name) ? '2px solid ' + accentColor(name) : 'none';
+    }
+
+    // ===================== PAGES =====================
+    var PAGES = {};
+
+    PAGES['main'] = {
+        title: 'Настройки',
+        body: function () {
+            var h = '';
+            h += '<div class="view-header"><h1 class="title" id="homeTitle" onclick="homeTap()">Настройки</h1></div>';
+            h += '<div class="view-content" style="padding-top:8px;">';
+
+            // Аккаунт Apple — верхняя карточка
+            h += '<section class="group"><div class="row profile-row" onclick="push(\'login\')">';
+            h += avaHTML(62);
+            h += '<div class="label"><span class="name">' + (S.signed ? esc(S.nick || S.name) : 'Аккаунт Apple') + '</span>';
+            if (S.signed) {
+                h += '<span class="sub profile-sub">Аккаунт Apple, iCloud и другое</span>';
+            } else {
+                h += '<span class="sub profile-note">Войдите, чтобы получить доступ</span>';
+                h += '<span class="sub profile-note">• к своим данным iCloud, настроить</span>';
+                h += '<span class="sub profile-note">App Store, использовать сервисы</span>';
+                h += '<span class="sub profile-note">Apple и многое другое.</span>';
+            }
+            h += '</div><span class="chevron">&#8250;</span></div></section>';
+
+            // Группа 1
+            h += group('', row({ icon: 'airplane', cls: 'c-orange', t: 'Авиарежим', switch: 'ap' }) +
+                          row({ icon: 'wifi', cls: 'c-blue', t: 'Wi-Fi', val: S.wifi ? 'Моя сеть' : 'Не подключено', href: 'wifi' }) +
+                          row({ icon: 'bt', cls: 'c-blue', t: 'Bluetooth', val: S.bt ? 'Вкл.' : 'Не подключено', href: 'bt' }) +
+                          row({ icon: 'signal', cls: 'c-green', t: 'Сотовая связь', val: S.cell ? 'МТС' : 'Выкл.', href: 'cell' }) +
+                          row({ icon: 'hotspot', cls: 'c-blue', t: 'Режим модема', val: 'Выкл.', href: 'hotspot' }) +
+                          row({ icon: 'battery', cls: 'c-green', t: 'Аккумулятор', href: 'battery' }) +
+                          row({ icon: 'vpn', cls: 'c-blue', t: 'VPN', val: 'Не подключено', href: 'vpn' }));
+
+            // Группа 2 — иконки из второго фото (точное соответствие по пользователю)
+            h += group('', row({ icon: 'general2', t: 'Основные', href: 'general' }) +
+                          row({ icon: 'access2', t: 'Универсальный доступ', href: 'accessibility' }) +
+                          row({ icon: 'pencil', cls: 'c-violet', t: 'Камера', href: 'camera' }) +
+                          row({ icon: 'g2', t: 'Кнопка действия', href: 'actionbtn' }) +
+                          row({ icon: 'u2', t: 'Обои', href: 'wall' }) +
+                          row({ icon: 'cam2', t: 'Оформление', href: 'appearance' }) +
+                          row({ icon: 'act2', t: 'Поиск', href: 'search' }) +
+                          row({ icon: 'o2', t: 'Пункт управления', href: 'control' }) +
+                          row({ icon: 'search2', t: 'Режим ожидания', href: 'standby' }) +
+                          row({ icon: 'ui2', t: 'Экран «Домой» и библиотека приложений', href: 'homescreen' }) +
+                          row({ icon: 'ac2', t: 'Экран и яркость', href: 'display' }) +
+                          row({ icon: 'siri2', t: 'Siri', href: 'siri' }));
+
+            // Группа 3
+            h += group('', row({ icon: 'bell', cls: 'c-red', t: 'Уведомления', href: 'notif' }) +
+                          row({ icon: 'speaker', cls: 'c-red', t: 'Звуки и вибрация', href: 'sound' }) +
+                          row({ icon: 'moon', cls: 'c-violet', t: 'Фокусирование', href: 'focus' }) +
+                          row({ icon: 'hourglass', cls: 'c-violet', t: 'Экранное время', href: 'scrtime' }));
+
+            // Группа 4
+            h += group('', row({ icon: 'faceid', cls: 'c-green', t: 'Face ID и код-пароль', href: 'faceid' }) +
+                          row({ icon: 'sos', cls: 'c-red', t: 'Экстренный вызов — SOS', href: 'sos' }) +
+                          row({ icon: 'lock', cls: 'c-blue', t: 'Конфиденциальность и безопасность', href: 'priv' }));
+
+            // Группа 5
+            h += group('', row({ icon: 'gamepad', cls: 'c-teal', t: 'Game Center', href: 'game' }) +
+                          row({ icon: 'cloud', cls: 'c-blue', t: 'iCloud', href: 'icloud' }) +
+                          row({ icon: 'wallet', cls: 'c-grey', t: 'Wallet', href: 'wallet' }));
+
+            // Группа 6 — Приложения
+            h += group('', row({ icon: 'apps', cls: 'c-blue', t: 'Приложения', href: 'apps' }));
+
+            // Группа 7 — Разработчик
+            h += group('', row({ icon: 'wrench', cls: 'c-grey', t: 'Разработчик', href: 'dev' }));
+
+            // Поиск — внизу списка
+            h += '</div>';
+            h += '<div class="home-search"><div class="search-glass"><span class="mglass"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></span><span>Поиск</span></div></div>';
+            return h;
+        }
+    };
+
+    // Вход в iPhone / iCloud (fake login)
+    PAGES['login'] = {
+        title: 'Аккаунт Apple',
+        body: function () {
+            var h = '<div class="icloud-hero">';
+            if (S.signed) {
+                h += avaHTML(86);
+                h += '<h2>' + esc(S.nick || S.name) + '</h2>';
+                h += '<p class="icloud-mail">' + esc(S.email) + '</p>';
+                h += '<p>Вы вошли в iCloud. Здесь можно изменить имя iPhone, серийный номер и другие параметры.</p>';
+                h += '</div>';
+                h += group('', '<div class="row" onclick="pickAvatar()">' + ic('camera', 'c-blue') + '<div class="label"><span>Изменить фото</span></div><span class="chevron">&#8250;</span></div>' +
+                               (S.avatar ? '<div class="row" onclick="clearAvatar()">' + ic('trash', 'c-red') + '<div class="label"><span style="color:' + (S.dark ? '#ff453a' : '#ff3b30') + '">Удалить фото</span></div></div>' : '') +
+                               '<div class="row" onclick="doSignout()">' + ic('logout', 'c-red') + '<div class="label"><span style="color:' + (S.dark ? '#ff453a' : '#ff3b30') + '">Выйти из iCloud</span></div></div>');
+            } else {
+                h += '<div class="ava-pick" onclick="pickAvatar()">' + avaHTML(110, 'sign');
+                h += '<div class="ava-cam"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.2"/></svg></div></div>';
+                h += '<p class="ava-hint" onclick="pickAvatar()">Нажмите, чтобы выбрать фото</p>';
+                h += '<h2>Аккаунт Apple</h2>';
+                h += '<p>Настройка iCloud, App Store и многое другое. Войдите в Apple ID.</p></div>';
+                h += group('', '<div class="field-group">' +
+                          '<label class="field-label">Почта iCloud</label><input class="field-input" id="logEmail" type="text" placeholder="example@icloud.com" value="' + esc(S.email) + '" autocomplete="off">' +
+                          '<label class="field-label blk">Ник iCloud</label><input class="field-input" id="logNick" type="text" placeholder="Ваш ник" value="' + esc(S.nick) + '" autocomplete="off">' +
+                          '</div>' +
+                          '<div style="padding:4px 0 12px"><button class="btn-blue" onclick="doSignin()">Войти</button></div>' +
+                          '<div style="padding:2px 0 14px;text-align:center"><button class="btn-plain" onclick="doSignin()">Пропустить</button></div>');
+            }
+            return h;
+        }
+    };
+    function doSignin() {
+        var e = document.getElementById('logEmail');
+        var n = document.getElementById('logNick');
+        S.email = e && e.value.trim() ? e.value.trim() : S.email;
+        S.nick = n && n.value.trim() ? n.value.trim() : S.nick;
+        S.signed = true; saveS(); refresh('login'); refresh('icloud'); refresh('main');
+    }
+    function doSignout() { S.signed = false; S.email = ''; S.nick = ''; saveS(); refresh('login'); refresh('icloud'); refresh('main'); }
+    function refresh(id) {
+        var el = document.getElementById('v-' + id);
+        if (el) {
+            if (id === 'main') el.innerHTML = PAGES[id].body();
+            else el.querySelector('.view-content').innerHTML = PAGES[id].body();
+        }
+    }
+
+    // ===== Аватары и фото =====
+    function avaHTML(px, mode) {
+        if (mode === 'sign' && !S.avatar) {
+            return '<div class="avatar" style="width:' + px + 'px;height:' + px + 'px;background:#8e8e93;box-shadow:none"><svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1.3-3.2 4-4.5 7.5-4.5s6.2 1.3 7.5 4.5"/></svg></div>';
+        }
+        var src = S.avatar || '/static/avatar-sign-in.png';
+        return '<div class="avatar" style="width:' + px + 'px;height:' + px + 'px;overflow:hidden;box-shadow:none;background:#1c1c1e"><img src="' + src + '" style="width:100%;height:100%;object-fit:cover;display:block"></div>';
+    }
+    function pickAvatar() {
+        var inp = document.createElement('input');
+        inp.type = 'file';
+        inp.accept = 'image/*';
+        inp.style.display = 'none';
+        inp.onchange = function () {
+            var f = inp.files && inp.files[0];
+            if (!f) return;
+            var rd = new FileReader();
+            rd.onload = function () {
+                var img = new Image();
+                img.onload = function () {
+                    var s = 400, w = img.width, h = img.height;
+                    var sc = Math.max(s / w, s / h);
+                    var nw = Math.round(w * sc), nh = Math.round(h * sc);
+                    var cv = document.createElement('canvas');
+                    cv.width = s; cv.height = s;
+                    var ctx = cv.getContext('2d');
+                    ctx.fillStyle = '#1c1c1e';
+                    ctx.fillRect(0, 0, s, s);
+                    ctx.drawImage(img, Math.round((s - nw) / 2), Math.round((s - nh) / 2), nw, nh);
+                    S.avatar = cv.toDataURL('image/jpeg', 0.85);
+                    saveS();
+                    refresh('login'); refresh('icloud'); refresh('main');
+                };
+                img.src = rd.result;
+            };
+            rd.readAsDataURL(f);
+        };
+        document.body.appendChild(inp);
+        inp.click();
+    }
+    function clearAvatar() { S.avatar = ''; saveS(); refresh('login'); refresh('icloud'); refresh('main'); }
+
+    // iCloud
+    PAGES['icloud'] = {
+        title: 'iCloud',
+        body: function () {
+            if (!S.signed) {
+                var h = '<div class="icloud-hero">';
+                h += '<div class="ava-pick" onclick="pickAvatar()">' + avaHTML(110, 'sign');
+                h += '<div class="ava-cam"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.2"/></svg></div></div>';
+                h += '<p class="ava-hint" onclick="pickAvatar()">Нажмите, чтобы выбрать фото</p>';
+                h += '<h2>iCloud</h2>';
+                h += '<p>Войдите в Apple ID, чтобы использовать iCloud. Введите почту и ник вашего iCloud.</p></div>';
+                h += group('', '<div class="field-group">' +
+                          '<label class="field-label">Почта iCloud</label><input class="field-input" id="logEmail" type="text" placeholder="example@icloud.com" value="' + esc(S.email) + '" autocomplete="off">' +
+                          '<label class="field-label blk">Ник iCloud</label><input class="field-input" id="logNick" type="text" placeholder="Ваш ник" value="' + esc(S.nick) + '" autocomplete="off">' +
+                          '</div>' +
+                          '<div style="padding:4px 0 12px"><button class="btn-blue" onclick="doSignin()">Войти</button></div>' +
+                          '<div style="padding:2px 0 14px;text-align:center"><button class="btn-plain" onclick="doSignin()">Пропустить</button></div>');
+                return h;
+            }
+            return group('', row({ icon: 'cloud', cls: 'c-blue', t: 'iCloud', val: S.email }) +
+                          row({ icon: 'lock', cls: 'c-blue', t: 'Пароли', href: 'icloud' })) +
+                   group('ХРАНИЛИЩЕ', row({ icon: 'gear', cls: 'c-grey', t: 'Управление хранилищем', val: '5 ГБ' }) +
+                          row({ icon: 'image', cls: 'c-teal', t: 'Фотографии', ksw: ['icloud_photos', true] }) +
+                          row({ icon: 'globe', cls: 'c-blue', t: 'Резервные копии', ksw: ['icloud_backup', true] }));
+        }
+    };
+
+    // Wi-Fi
+    PAGES['wifi'] = {
+        title: 'Wi‑Fi',
+        body: function () {
+            return group('', row({ icon: 'wifi', cls: 'c-blue', t: 'Wi‑Fi', switch: 'wifi' })) +
+                   group('СЕТИ', '<div class="row" onclick="push(\'wifi\')"><div class="label"><span style="color:#007aff">Моя сеть</span><span class="sub">Сохранённая сеть</span></div><span class="value">&#10003;</span><span class="chevron">&#8250;</span></div>' +
+                         '<div class="row" onclick="push(\'wifi\')"><div class="label"><span>Сеть Ростелеком</span></div><span class="value">&#128274;</span><span class="chevron">&#8250;</span></div>' +
+                         '<div class="row" onclick="push(\'wifi\')"><div class="label"><span>iPhone-AE-87</span></div><span class="chevron">&#8250;</span></div>') +
+                   '<div style="padding:16px 16px 0"><button class="btn-grey" onclick="push(\'wifi\')">Другие…</button></div>';
+        }
+    };
+
+    // Bluetooth
+    PAGES['bt'] = {
+        title: 'Bluetooth',
+        body: function () {
+            return group('', row({ icon: 'bt', cls: 'c-blue', t: 'Bluetooth', switch: 'bt' })) +
+                   group('МОИ УСТРОЙСТВА', '<div class="row"><div class="icon c-grey"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M8 4h8a3 3 0 0 1 0 6H8a3 3 0 0 1 0-6z"/><path d="M6 10v10M18 10a3 3 0 0 1 0 6c-4 0-4-6-8-6v6"/></svg></div><div class="label"><span>Наушники TWS</span><span class="sub">Не подключено</span></div><span class="chevron">&#8250;</span></div>') +
+                   '<div style="padding:16px 16px 0"><button class="btn-grey" onclick="push(\'bt\')">Другие устройства…</button></div>';
+        }
+    };
+
+    // Cellular
+    PAGES['cell'] = {
+        title: 'Сотовая связь',
+        body: function () {
+            return group('', row({ icon: 'signal', cls: 'c-green', t: 'Сотовые данные', ksw: ['cell_on', true] })) +
+                   group('', row({ icon: 'signal', cls: 'c-green', t: 'Основной тариф', val: 'МТС' }) +
+                         row({ icon: 'globe', cls: 'c-blue', t: 'Роуминг', val: 'Выкл.' }) +
+                         row({ icon: 'signal', cls: 'c-green', t: 'Параметры данных', href: 'cell' }));
+        }
+    };
+
+    // Simple pages map
+    var SIMPLE = [
+        ['notif', 'Уведомления', [['bell', 'c-red', 'Уведомления', null], ['bell', 'c-red', 'Экранные уведомления', 'Вкл.'], ['bell', 'c-red', 'Экран блокировки', 'Вкл.']]],
+['sound', 'Звуки и вибрация', [['speaker', 'c-red', 'Звуки клавиатуры', null], ['moon', 'c-violet', 'Режим без звука', null], ['bell', 'c-red', 'Звук вызова', '25%']]],
+        ['focus', 'Фокусирование', [['moon', 'c-violet', 'Не беспокоить', null], ['battery', 'c-green', 'Сон', null], ['person', 'c-blue', 'Личное время', null]]],
+        ['scrtime', 'Экранное время', [['hourglass', 'c-violet', 'Экранное время', 'Вкл.'], ['gear', 'c-grey', 'Ограничения', null]]],
+        ['control', 'Пункт управления', [['sliders', 'c-grey', 'Доступ в приложениях', 'Вкл.'], ['wifi', 'c-blue', 'Быстрые переключатели', null]]],
+        ['display', 'Экран и яркость', [['sun', 'c-blue', 'Яркость', '40%'], ['sun', 'c-blue', 'Автояркость', null], ['gear', 'c-grey', 'Автоблокировка', '1 минута']]],
+        ['wall', 'Обои', [['image', 'c-teal', 'Новые обои', null], ['image', 'c-teal', 'Текущие обои', null]]],
+        ['siri', 'Siri', [['siri', 'c-indigo', 'Спросить Siri', 'Вкл.'], ['siri', 'c-indigo', 'Заблокированный экран', 'Вкл.']]],
+        ['faceid', 'Face ID и код-пароль', [['faceid', 'c-green', 'Face ID', 'Вкл.'], ['lock', 'c-green', 'Код-пароль', 'Вкл.']]],
+        ['sos', 'Экстренный вызов — SOS', [['sos', 'c-red', 'Вызов по боковой кнопке', null], ['sos', 'c-red', 'Автодозвон', null]]],
+        ['battery', 'Аккумулятор', [['battery', 'c-green', 'Состояние аккумулятора', '82%'], ['battery', 'c-green', 'Оптимизированная зарядка', null]]],
+        ['priv', 'Конфиденциальность и безопасность', [['lock', 'c-blue', 'Отслеживание', 'Вкл.'], ['faceid', 'c-blue', 'Face ID и код-пароль', null], ['globe', 'c-blue', 'Службы геолокации', 'Вкл.']]],
+        ['appstore', 'App Store', [['apps', 'c-blue', 'Автоматические обновления', null], ['apps', 'c-blue', 'Автозагрузка приложений', null]]],
+        ['wallet', 'Wallet', [['wallet', 'c-grey', 'Карты в Wallet', '2'], ['wallet', 'c-grey', 'Apple Pay', 'Вкл.']]],
+        ['game', 'Game Center', [['gamepad', 'c-teal', 'Учётная запись', 'Не вход'], ['gamepad', 'c-teal', 'Однопользовательские игры', null]]]
+    ];
+    SIMPLE.forEach(function (def) {
+        var id = def[0], title = def[1], rowsDef = def[2];
+        PAGES[id] = {
+            title: title,
+            body: function () {
+                var h = '';
+                var curId = id;
+                rowsDef.forEach(function (r, i) {
+                    var opts = { icon: r[0], cls: r[1], t: r[2], val: r[3] };
+                    if (r[2] === 'Яркость' || r[2] === 'Звук вызова') {
+                        opts.val = r[3];
+                    }
+                    if (r[3] === null) opts.switch = false; // plain rows
+                    h += '<div class="row" onclick="push(\'' + (i === 0 ? curId : curId) + '\')">';
+                    h += ic(r[0], r[1]);
+                    h += '<div class="label"><span>' + r[2] + '</span></div>';
+                    if (r[3] !== null) h += '<span class="value">' + r[3] + '</span>';
+                    if (r[3] === null) h += ksw(curId + '_' + i, true);
+                    h += '<span class="chevron">&#8250;</span></div>';
+                });
+                return '<section class="group">' + h + '</section>';
+            }
+        };
+    });
+
+    // Режим модема
+    PAGES['hotspot'] = {
+        title: 'Режим модема',
+        body: function () {
+            return group('', row({ icon: 'hotspot', cls: 'c-blue', t: 'Режим модема', ksw: ['hotspot_on', false] }) +
+                          row({ icon: 'lock', cls: 'c-blue', t: 'Пароль Wi-Fi', val: 'iPhone-3489' }));
+        }
+    };
+
+    // VPN
+    PAGES['vpn'] = {
+        title: 'VPN',
+        body: function () {
+            return group('', row({ icon: 'globe', cls: 'c-blue', t: 'Статус', val: 'Не подключено' }) +
+                          row({ icon: 'lock', cls: 'c-blue', t: 'VPN', ksw: ['vpn_on', false] }) +
+                          row({ icon: 'vpn', cls: 'c-blue', t: 'Добавить конфигурацию', href: 'vpn' }));
+        }
+    };
+
+    // Универсальный доступ
+    PAGES['accessibility'] = {
+        title: 'Универсальный доступ',
+        body: function () {
+            return group('', row({ icon: 'sun', cls: 'c-blue', t: 'Зрение', href: 'accessibility' }) +
+                          row({ icon: 'person', cls: 'c-blue', t: 'Движение', href: 'accessibility' }) +
+                          row({ icon: 'speaker', cls: 'c-red', t: 'Слух', href: 'accessibility' }) +
+                          row({ icon: 'gear', cls: 'c-grey', t: 'Обучение', href: 'accessibility' }));
+        }
+    };
+
+    // Кнопка действия
+    PAGES['actionbtn'] = {
+        title: 'Кнопка действия',
+        body: function () {
+            return group('', row({ icon: 'sliders', cls: 'c-grey', t: 'Выбор действия', val: 'Бездействие' }) +
+                          row({ icon: 'moon', cls: 'c-violet', t: 'Режим без звука', ksw: ['action_silent', false] }) +
+                          row({ icon: 'gear', cls: 'c-grey', t: 'Настройки действия', href: 'actionbtn' }));
+        }
+    };
+
+    // Оформление
+    PAGES['appearance'] = {
+        title: 'Оформление',
+        body: function () {
+            return group('', row({ icon: 'moon', cls: 'c-indigo', t: 'Внешний вид', val: 'Тёмный' }) +
+                          row({ icon: 'image', cls: 'c-teal', t: 'Иконки', val: 'По умолчанию' }));
+        }
+    };
+
+    // Поиск
+    PAGES['search'] = {
+        title: 'Поиск',
+        body: function () {
+            return group('', row({ icon: 'search', cls: 'c-grey', t: 'Поиск', val: 'Siri и Поиск' }) +
+                          row({ icon: 'bell', cls: 'c-red', t: 'Предложения Siri', ksw: ['search_siri', true] }));
+        }
+    };
+
+    // Режим ожидания
+    PAGES['standby'] = {
+        title: 'Режим ожидания',
+        body: function () {
+            return group('', row({ icon: 'moon', cls: 'c-indigo', t: 'Режим ожидания', ksw: ['standby_on', true] }) +
+                          row({ icon: 'battery', cls: 'c-green', t: 'Автостарт', ksw: ['standby_auto', true] }));
+        }
+    };
+
+    // Экран «Домой» и библиотека приложений
+    PAGES['homescreen'] = {
+        title: 'Экран «Домой» и библиотека приложений',
+        body: function () {
+            return group('', row({ icon: 'grid', cls: 'c-blue', t: 'Новые загрузки', val: 'На экран «Домой»' }) +
+                          row({ icon: 'grid', cls: 'c-blue', t: 'Библиотека приложений', ksw: ['hs_library', true] }) +
+                          row({ icon: 'sliders', cls: 'c-grey', t: 'Показывать папки', ksw: ['hs_folders', false] }));
+        }
+    };
+
+    // Приложения
+    PAGES['apps'] = {
+        title: 'Приложения',
+        body: function () {
+            return group('', row({ icon: 'apps', cls: 'c-blue', t: 'Установленные приложения', val: '42' }) +
+                          row({ icon: 'apps', cls: 'c-blue', t: 'App Store', href: 'appstore' }) +
+                          row({ icon: 'lock', cls: 'c-blue', t: 'Пароли в приложениях', ksw: ['apps_passwords', true] }));
+        }
+    };
+
+    // Камера
+    PAGES['camera'] = {
+        title: 'Камера',
+        body: function () {
+            return group('', row({ icon: 'sliders', cls: 'c-grey', t: 'Формат', val: 'Высокая эффективность', href: 'camera' }) +
+                          row({ icon: 'camera', cls: 'c-blue', t: 'Разрешение видео', val: '1080p', href: 'camera' }) +
+                          row({ icon: 'speedo', cls: 'c-grey', t: 'Частота кадров', val: '30', href: 'camera' })) +
+                   group('', row({ icon: 'person', cls: 'c-blue', t: 'Отразить фронтальную камеру', ksw: ['cam_mirror', false] }) +
+                          row({ icon: 'grid', cls: 'c-blue', t: 'Сетка', ksw: ['cam_grid', true] }));
+        }
+    };
+
+    // Разработчик
+    PAGES['dev'] = {
+        title: 'Разработчик',
+        body: function () {
+            return group('', row({ icon: 'gear', cls: 'c-grey', t: 'Режим разработчика', switch: 'dev' }) +
+                          row({ icon: 'sliders', cls: 'c-grey', t: 'Уровень журнала', val: 'Инфо', href: 'dev' }) +
+                          row({ icon: 'lock', cls: 'c-grey', t: 'Требовать подпись', ksw: ['dev_sign', true] })) +
+                   group('', '<div class="row"><div class="label"><span class="sub" style="white-space:normal">Демонстрационная страница раздела «Разработчик»</span></div></div>');
+        }
+    };
+
+    // General — «Основные» (точная копия экрана по скриншотам)
+    PAGES['general'] = {
+        title: 'Основные',
+        body: function () {
+            var h = '<div class="g-hero">' +
+                    '<img class="g-hero-bg" src="/static/tabosnovnye.jpg" alt="" draggable="false">' +
+                    '<div class="g-title">Основные</div>' +
+                    '<div class="g-sub">Настройте основные параметры iPhone, такие как обновление ПО, язык устройства, CarPlay и AirDrop.</div></div>';
+            h += group('', row({ icon: 'info', cls: 'c-blue', t: 'Об этом устройстве', href: 'about' }) +
+                           row({ icon: 'arrow', cls: 'c-orange', t: 'Обновление ПО', href: 'general' }) +
+                           row({ icon: 'box', cls: 'c-blue', t: 'Хранилище iPhone', href: 'general' }));
+            h += group('', row({ icon: 'shield', cls: 'c-green', t: 'AppleCare и гарантия', href: 'general' }));
+            h += group('', row({ icon: 'airdrop', cls: 'c-blue', t: 'AirDrop', href: 'general' }) +
+                           row({ icon: 'phone', cls: 'c-blue', t: 'AirPlay и Непрерывность', href: 'general' }) +
+                           row({ icon: 'apps', cls: 'c-indigo', t: 'Картинка в картинке', href: 'general' }) +
+                           row({ icon: 'camera', cls: 'c-indigo', t: 'Снимки экрана', href: 'general' }) +
+                           row({ icon: 'car', cls: 'c-blue', t: 'CarPlay', href: 'general' }));
+            h += group('', row({ icon: 'lock', cls: 'c-blue', t: 'Автозаполнение и пароли', href: 'general' }) +
+                           row({ icon: 'clock', cls: 'c-blue', t: 'дата и время', href: 'general' }) +
+                           row({ icon: 'keyboard', cls: 'c-grey', t: 'Клавиатура', href: 'general' }) +
+                           row({ icon: 'cloud', cls: 'c-blue', t: 'Обновление контента', href: 'general' }) +
+                           row({ icon: 'book', cls: 'c-grey', t: 'Словарь', href: 'general' }) +
+                           row({ icon: 'font', cls: 'c-grey', t: 'Шрифты', href: 'general' }) +
+                           row({ icon: 'globe', cls: 'c-blue', t: 'Язык и регион', href: 'general' }));
+            h += group('', row({ icon: 'signal', cls: 'c-green', t: 'Телепровайдер', href: 'general' }));
+            h += group('', row({ icon: 'vpn', cls: 'c-blue', t: 'VPN и управление устройством', href: 'general' }));
+            h += group('', row({ icon: 'code', cls: 'c-grey', t: 'Правовая информация', href: 'general' }));
+            h += group('', row({ icon: 'reset', cls: 'c-grey', t: 'Перенос или сброс iPhone', href: 'general' }));
+            h += '<div style="padding:34px 14px 0"><button class="shutdown-btn" onmousedown="pressBack(this)" ontouchstart="pressBack(this)" onclick="openPower()">ВЫКЛЮЧИТЬ</button></div>';
+            return h;
+        }
+    };
+
+    // About device
+    PAGES['about'] = {
+        title: 'Об этом устройстве',
+        body: function () {
+            return group('', '<div class="row field-row" onclick="openSheet(\'name\',\'Имя устройства\',S.name)"><div class="label"><span>Имя устройства</span></div><span class="value">' + esc(S.name) + '</span><span class="chevron">&#8250;</span></div>' +
+                          '<div class="row"><div class="label"><span>Версия iOS</span></div><span class="value">' + esc(S.ios) + '</span></div>' +
+                          '<div class="row"><div class="label"><span>Название модели</span></div><span class="value">' + esc(S.model) + '</span></div>' +
+                          '<div class="row noflash" onclick="toggleMnum()"><div class="label"><span>Номер модели</span></div><span class="value" id="aboutMnum">' + esc(S.mnum) + '</span></div>' +
+                          '<div class="row"><div class="label"><span>Серийный номер</span></div><span class="value">' + esc(S.serial) + '</span></div>') +
+group('', '<div class="row"><div class="label"><span>Песни</span></div><span class="value">' + esc(S.cap.songs) + '</span></div>' +
+                           '<div class="row"><div class="label"><span>Видео</span></div><span class="value">' + esc(S.cap.videos) + '</span></div>' +
+                           '<div class="row"><div class="label"><span>Фото</span></div><span class="value">' + esc(S.cap.photos) + '</span></div>' +
+                           '<div class="row"><div class="label"><span>Приложения</span></div><span class="value">' + esc(S.cap.apps) + '</span></div>' +
+                           '<div class="row"><div class="label"><span>Емкость</span></div><span class="value">' + esc(S.cap.total) + '</span></div>' +
+                           '<div class="row"><div class="label"><span>Доступно</span></div><span class="value">' + esc(S.cap.free) + '</span></div>') +
+                   group('', '<div class="row"><div class="label"><span>IMEI</span></div><span class="value">35-666732-098761-2</span></div>' +
+                          '<div class="row"><div class="label"><span>ICCID</span></div><span class="value">89 77 02 66 666 732…</span></div>' +
+                          '<div class="row"><div class="label"><span>EID</span></div><span class="value">890490320254235…</span></div>' +
+                          '<div class="row"><div class="label"><span>Мобильный номер</span></div><span class="value">МТС</span></div>') +
+                   group('', '<div class="row"><div class="label"><span>Адрес Wi-Fi</span></div><span class="value">F4:5C:89:9A:00:12</span></div>' +
+                          '<div class="row"><div class="label"><span>Адрес Bluetooth</span></div><span class="value">F4:5C:89:9A:00:12</span></div>') +
+                   group('', '<div class="row" onclick="push(\'general\')">' + ic('code', 'c-blue') + '<div class="label"><span>Юридическая информация</span></div><span class="chevron">&#8250;</span></div>' +
+                          '<div class="row" onclick="push(\'general\')">' + ic('shield', 'c-blue') + '<div class="label"><span>Стандарты сертификации</span></div><span class="chevron">&#8250;</span></div>' +
+                          '<div class="row" onclick="push(\'general\')">' + ic('phone', 'c-blue') + '<div class="label"><span>Поддержка</span></div><span class="chevron">&#8250;</span></div>');
+        }
+    };
+
+    // Custom Settings — the main feature page
+    PAGES['custom'] = {
+        title: 'Custom Settings',
+        body: function () {
+            var h = '';
+            h += group('', row({ icon: 'pencil', cls: 'c-violet', t: 'Custom Settings', sub: 'Изменяй название и параметры iPhone' }));
+            h += '<p class="group-header">УСТРОЙСТВО</p><section class="group">';
+            h += '<div class="row field-row" onclick="openSheet(\'name\',\'Название iPhone\',S.name)">' + ic('pencil', 'c-violet') + '<div class="label"><span>Название iPhone</span></div><span class="value">' + esc(S.name) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'serial\',\'Серийный номер\',S.serial)">' + ic('lock', 'c-blue') + '<div class="label"><span>Серийный номер</span></div><span class="value">' + esc(S.serial) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'model\',\'Номер модели\',S.model)">' + ic('image', 'c-teal') + '<div class="label"><span>Номер модели</span></div><span class="value">' + esc(S.model) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'ios\',\'Версия iOS\',S.ios)">' + ic('gear', 'c-grey') + '<div class="label"><span>Версия iOS</span></div><span class="value">' + esc(S.ios) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '</section>';
+
+            h += '<p class="group-header">ПАМЯТЬ</p><section class="group">';
+            h += '<div class="row field-row" onclick="openSheet(\'cap.songs\',\'Песни\',S.cap.songs)">' + ic('clock', 'c-pink') + '<div class="label"><span>Песни</span></div><span class="value">' + esc(S.cap.songs) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'cap.videos\',\'Видео\',S.cap.videos)">' + ic('arrow', 'c-orange') + '<div class="label"><span>Видео</span></div><span class="value">' + esc(S.cap.videos) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'cap.photos\',\'Фото\',S.cap.photos)">' + ic('camera', 'c-green') + '<div class="label"><span>Фото</span></div><span class="value">' + esc(S.cap.photos) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'cap.apps\',\'Приложения\',S.cap.apps)">' + ic('grid', 'c-blue') + '<div class="label"><span>Приложения</span></div><span class="value">' + esc(S.cap.apps) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'cap.total\',\'Емкость\',S.cap.total)">' + ic('lock', 'c-grey') + '<div class="label"><span>Емкость</span></div><span class="value">' + esc(S.cap.total) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '<div class="row field-row" onclick="openSheet(\'cap.free\',\'Доступно\',S.cap.free)">' + ic('image', 'c-teal') + '<div class="label"><span>Доступно</span></div><span class="value">' + esc(S.cap.free) + '</span><span class="chevron">&#8250;</span></div>';
+            h += '</section>';
+
+            h += '<p class="group-header">ЦВЕТ АКЦЕНТА</p><section class="group"><div class="row"><div class="label"><span>Акцентный цвет</span></div><span class="value" id="accentVal">' + esc(S.accent) + '</span></div></section>';
+            h += '<section class="group"><div style="display:flex;gap:10px;justify-content:center;padding:14px 10px;flex-wrap:wrap">';
+            var colors = ['#007aff', '#34c759', '#af52de', '#ff9500', '#ff2d55', '#5ac8fa'];
+            var names = ['Синий', 'Зелёный', 'Фиолетовый', 'Оранжевый', 'Розовый', 'Голубой'];
+            for (var i = 0; i < colors.length; i++) {
+                var sel = S.accent === names[i];
+                h += '<div class="acc" data-c="' + names[i] + '" onclick="pickAccent(\'' + names[i] + '\')" style="width:34px;height:34px;border-radius:50%;background:' + colors[i] + ';' + (sel ? 'outline:2px solid ' + colors[i] + ';outline-offset:2px' : '') + '"></div>';
+            }
+            h += '</div></section>';
+
+            h += '<p class="group-header">ОФОРМЛЕНИЕ</p><section class="group">';
+            h += '<div class="row" onclick="toggleDark()">' + ic('moon', 'c-indigo') + '<div class="label"><span>Тёмный интерфейс</span><span class="sub">Чёрное оформление настроек</span></div><span class="switch' + (S.dark ? ' on' : '') + '" id="darkSw" ontouchstart="pressSw(this)" onmousedown="pressSw(this)"><span class="knob"></span></span></div>';
+            h += '</section>';
+
+            h += '<div style="padding:8px 8px 0"><p style="font-size:14px;color:#0a84ff;text-align:center;line-height:1.5;font-weight:600">Support tg @NoRecovery. Tgk @Vo1dekA12</p></div>';
+            return h;
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // inject .view-header style already present
+        buildAll();
+        initSwipeBack();
+    });
+
+    // ===================== EDGE SWIPE BACK (iOS style) =====================
+    var swipeStartX = 0, swipeStartY = 0, swipeTracking = false, swipeDeltaX = 0, swipeGestureActive = false;
+    var EDGE_ZONE = 26;
+    var snapThreshold = 42;
+
+    function initSwipeBack() {
+        var views = document.getElementById('views');
+        var currentSwipe = null;
+        views.addEventListener('touchstart', function (e) {
+            if (stack.length <= 1) return;
+            var t = e.touches[0];
+            if (t.clientX <= EDGE_ZONE) {
+                currentSwipe = { startX: t.clientX, startY: t.clientY, active: true };
+                swipeTracking = true;
+            }
+        }, { passive: true });
+        views.addEventListener('touchmove', function (e) {
+            if (!currentSwipe || !currentSwipe.active) return;
+            var t = e.touches[0];
+            var dx = t.clientX - currentSwipe.startX;
+            var dy = t.clientY - currentSwipe.startY;
+            if (swipeTracking && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+                swipeGestureActive = true;
+                e.preventDefault();
+                var topId = stack[stack.length - 1];
+                var prevId = stack[stack.length - 2];
+                var cur = document.getElementById('v-' + topId);
+                var nx = document.getElementById('v-' + prevId);
+                if (cur && nx) {
+                    if (nx.style.display === 'none') { nx.style.display = 'block'; nx.style.transform = 'translateX(-50%)'; nx.style.zIndex = ''; }
+                    nx.classList.add('active');
+                    cur.classList.add('active');
+                    if (cur.style.display === 'none') cur.style.display = 'block';
+                    cur.style.zIndex = 2;
+                    cur.style.transition = 'none';
+                    nx.style.transition = 'none';
+                    var tn = document.getElementById('topNav');
+                    if (tn) {
+                        tn.classList.add('show');
+                        var tt = document.getElementById('topNavTitle');
+                        var p = PAGES[prevId];
+                        if (tt && p) tt.textContent = p.title;
+                    }
+                    var pct = Math.max(0, Math.min(1, dx / 280));
+                    cur.style.transform = 'translateX(' + pct * 100 + '%)';
+                    nx.style.transform = 'translateX(' + (-50 + pct * 50) + '%)';
+                    currentSwipe.lastX = t.clientX;
+                }
+            }
+        }, { passive: false });
+        views.addEventListener('touchend', function (e) {
+            if (!currentSwipe || !currentSwipe.active) return;
+            if (!swipeGestureActive) { currentSwipe = null; swipeTracking = false; return; }
+            var topId = stack[stack.length - 1];
+            var prevId = stack[stack.length - 2];
+            var cur = document.getElementById('v-' + topId);
+            var nx = document.getElementById('v-' + prevId);
+            var tx = e.changedTouches[0].clientX;
+            var dx = tx - currentSwipe.startX;
+            var doPop = dx > snapThreshold && cur;
+            if (doPop) {
+                if (nx) { nx.style.display = 'block'; nx.style.zIndex = ''; nx.classList.add('active'); nx.style.transition = 'transform 0.45s cubic-bezier(0.22,0.61,0.36,1)'; nx.style.transform = 'translateX(0)'; }
+                if (cur) { cur.style.transition = 'transform 0.45s cubic-bezier(0.22,0.61,0.36,1)'; cur.style.transform = 'translateX(100%)'; }
+                setTimeout(function () {
+                    if (cur) { cur.style.display = ''; cur.classList.remove('active'); resetViewStyles(cur); }
+                    if (nx) { nx.classList.add('active'); nx.style.display = ''; }
+                    stack.pop();
+                    updateBackBtn();
+                }, 460);
+            } else {
+                if (cur) { cur.style.transition = 'transform 0.45s cubic-bezier(0.22,0.61,0.36,1)'; cur.style.transform = 'translateX(0)'; }
+                if (nx) { nx.style.transition = 'transform 0.45s cubic-bezier(0.22,0.61,0.36,1)'; nx.style.transform = 'translateX(-50%)'; }
+                setTimeout(function () {
+                    if (cur) resetViewStyles(cur);
+                    if (nx) { nx.classList.remove('active'); nx.style.display = ''; resetViewStyles(nx); }
+                }, 460);
+            }
+            currentSwipe = null;
+            swipeTracking = false;
+            swipeGestureActive = false;
+            animating = false;
+        });
+    }
+    document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    document.addEventListener('dragstart', function (e) { if (e.target && e.target.tagName === 'IMG') e.preventDefault(); });
+    document.addEventListener('copy', function (e) { e.preventDefault(); });
+    document.addEventListener('cut', function (e) { e.preventDefault(); });
+    </script>
+    <script src="/static/js/html-to-image.js"></script>
+    <script src="/static/js/liquidglass.js?v=86"></script>
+    <link rel="stylesheet" href="/static/css/style.css?v=87">
+</body>
+</html>
