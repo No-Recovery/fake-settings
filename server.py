@@ -5,7 +5,7 @@ from datetime import datetime
 app = Flask(__name__)
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs.txt')
 
-APP_VERSION = 89
+APP_VERSION = 90
 
 LOG_PAGES = {'/': True, '/settings': True, '/instruction': True, '/static/icons-preview.html': True, '/logs': True}
 

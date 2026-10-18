@@ -15,7 +15,7 @@
     var UA_MODEL = {{ ua_model|tojson }};
     // Авто-обновление при новой версии на сервере (защита от агрессивного кэша Safari)
     (function () {
-        var BUILD = 89;
+        var BUILD = 90;
         function check() {
             fetch('/api/version', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
                 if (j.build && j.build !== BUILD) { location.reload(true); }
@@ -220,14 +220,11 @@ applyDark();
 
     function ic(name, cls, imgCls) {
         var v = IC[name] || '';
-        if (v.charAt(0) === '/') {
-            var imgc = imgCls ? ' ' + imgCls : '';
-            return '<div class="icon ' + (cls || 'glassless') + '"><img class="icon-img' + imgc + '" src="' + v + '" alt=""></div>';
+        if (v.charAt(0) === '<') {
+            return '<div class="icon ' + (cls || 'c-grey') + '"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + v + '</svg></div>';
         }
-        if (v.indexOf('data:image') === 0) {
-            return '<div class="icon glassless"><img class="icon-img' + (imgCls ? ' ' + imgCls : '') + '" src="' + v + '" alt=""></div>';
-        }
-        return '<div class="icon ' + (cls || 'c-grey') + '"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + v + '</svg></div>';
+        var imgc = imgCls ? ' ' + imgCls : '';
+        return '<div class="icon ' + (cls || 'glassless') + '"><img class="icon-img' + imgc + '" src="' + v + '" alt=""></div>';
     }
 
     // ===================== HELPERS =====================

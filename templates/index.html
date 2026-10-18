@@ -7,77 +7,102 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>No-Recovery — проекты</title>
+    <title>Проекты</title>
     <link rel="apple-touch-icon" href="/static/icon-180.png">
     <link rel="icon" href="/static/wtf.gif" type="image/gif">
-    <link rel="manifest" href="/static/manifest.json">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; }
         body {
-            background: #000000;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
-        .glow {
-            position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+        .wrap {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: calc(env(safe-area-inset-top, 0px) + 18px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
         }
-        .glow i {
-            position: absolute; display: block; border-radius: 50%; filter: blur(90px); opacity: 0.28;
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            padding: 10px 4px 14px;
         }
-        .glow .a { width: 320px; height: 320px; background: #71717a; top: -120px; left: -80px; }
-        .glow .b { width: 280px; height: 280px; background: #55555e; bottom: -100px; right: -60px; }
-        .wrap { position: relative; z-index: 1; max-width: 520px; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 30px) 18px calc(env(safe-area-inset-bottom, 0px) + 34px); }
-        .brand { text-align: center; margin-bottom: 26px; }
-        .brand h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
-        .brand p { font-size: 14px; color: #8e8e93; margin-top: 5px; }
-        .proj {
-            display: flex; align-items: center; gap: 14px;
-            background: rgba(44,44,46,0.66); border: 1px solid #2c2c2e; border-radius: 16px;
-            padding: 16px; margin-bottom: 14px; text-decoration: none; color: #fff;
-            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-            transition: transform .12s ease, background .12s ease;
+        .group {
+            background: #1c1c1e;
+            border-radius: 12px;
+            overflow: hidden;
         }
-        .proj:active { transform: scale(0.97); background: rgba(58,58,60,0.8); }
-        .proj .ic {
-            width: 54px; height: 54px; border-radius: 13px; flex: 0 0 auto;
-            display: flex; align-items: center; justify-content: center; font-size: 27px;
-            background: #1c1c1e; border: 1px solid #2c2c2e;
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            color: #fff;
+            text-decoration: none;
+            position: relative;
         }
-        .proj .ic img { width: 100%; height: 100%; border-radius: 13px; object-fit: cover; }
-        .proj .tx b { display: block; font-size: 17px; font-weight: 700; }
-        .proj .tx span { display: block; font-size: 13.5px; color: #8e8e93; margin-top: 3px; line-height: 1.35; }
-        .proj .arr { margin-left: auto; color: #48484a; font-size: 19px; flex: 0 0 auto; }
-        .mini { text-align: center; font-size: 12.5px; color: #5e5e64; margin-top: 20px; line-height: 1.5; }
+        .row:active { background: #2c2c2e; }
+        .row + .row::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 60px;
+            right: 0;
+            height: 0.5px;
+            background: #38383a;
+        }
+        .ic {
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .ic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .ic.blue { background: linear-gradient(180deg, #3b82f6, #2563eb); }
+        .ic.grey { background: #48484a; font-size: 20px; }
+        .tx { flex: 1; min-width: 0; }
+        .tx b { display: block; font-size: 17px; font-weight: 400; }
+        .tx span { display: block; font-size: 13px; color: #8e8e93; margin-top: 1px; }
+        .arr { color: #48484a; font-size: 20px; flex: 0 0 auto; }
+        .foot {
+            font-size: 13px;
+            color: #8e8e93;
+            padding: 10px 12px 0;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
-    <div class="glow"><i class="a"></i><i class="b"></i></div>
     <div class="wrap">
-        <div class="brand">
-            <h1>No-Recovery</h1>
-            <p>Выбери проект</p>
+        <h1>Проекты</h1>
+
+        <div class="group">
+            <a class="row" href="/settings">
+                <span class="ic blue"><img src="/static/icon-180.png" alt=""></span>
+                <span class="tx">
+                    <b>Fake Settings</b>
+                    <span>Настройки iPhone в браузере</span>
+                </span>
+                <span class="arr">&#8250;</span>
+            </a>
+            <a class="row" href="https://no-recovery.github.io/shake-icons/" target="_blank" rel="noopener">
+                <span class="ic grey">&#128241;</span>
+                <span class="tx">
+                    <b>Gravition Tweak</b>
+                    <span>Иконки со скриншотов — играй гироскопом</span>
+                </span>
+                <span class="arr">&#8250;</span>
+            </a>
         </div>
 
-        <a class="proj" href="/settings">
-            <span class="ic"><img src="/static/icon-180.png" alt=""></span>
-            <span class="tx">
-                <b>Fake Settings</b>
-                <span>Настройки iPhone в браузере — имитация iOS Settings</span>
-            </span>
-            <span class="arr">&#8250;</span>
-        </a>
-
-        <a class="proj" href="https://no-recovery.github.io/shake-icons/" target="_blank" rel="noopener">
-            <span class="ic">&#128241;</span>
-            <span class="tx">
-                <b>Gravition Tweak</b>
-                <span>Иконки с iPhone-скриншотов — играй гироскопом</span>
-            </span>
-            <span class="arr">&#8250;</span>
-        </a>
-
-        <p class="mini">Fake Settings добавляется на домашний экран через «Поделиться» → «На экран “Домой”».</p>
+        <p class="foot">Fake Settings добавляется на домашний экран через «Поделиться» → «На экран “Домой»».</p>
     </div>
 
     <script>
