@@ -11,6 +11,8 @@ def relink(text):
     text = re.sub(r'([\'"(=])/(static/)', r'\1\2', text)
     text = text.replace('href="/settings"', 'href="settings.html"')
     text = text.replace('href="/instruction"', 'href="instruction.html"')
+    text = text.replace('href="/install-settings"', 'href="install-settings.html"')
+    text = text.replace('href="/install-gravition"', 'href="install-gravition.html"')
     text = text.replace('href="/"', 'href="index.html"')
     text = text.replace("location.replace('/settings')", "location.replace('settings.html')")
     return text
@@ -33,6 +35,14 @@ def build():
         ins = relink(f.read())
     with open(os.path.join(SITE, 'instruction.html'), 'w', encoding='utf-8', newline='\n') as f:
         f.write(ins)
+
+    # install-settings.html / install-gravition.html — отдельные страницы
+    # установки, чтобы каждая веб-вкладка получала свою иконку.
+    for name in ('install-settings', 'install-gravition'):
+        with open(os.path.join(ROOT, 'templates', name + '.html'), encoding='utf-8') as f:
+            page = relink(f.read())
+        with open(os.path.join(SITE, name + '.html'), 'w', encoding='utf-8', newline='\n') as f:
+            f.write(page)
 
     # settings.html — без Jinja и без автобновления версии с сервера
     with open(os.path.join(ROOT, 'templates', 'settings.html'), encoding='utf-8') as f:

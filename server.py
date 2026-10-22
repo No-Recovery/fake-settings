@@ -7,7 +7,7 @@ LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs.txt')
 
 APP_VERSION = 90
 
-LOG_PAGES = {'/': True, '/settings': True, '/instruction': True, '/static/icons-preview.html': True, '/logs': True}
+LOG_PAGES = {'/': True, '/settings': True, '/instruction': True, '/install-settings': True, '/install-gravition': True, '/static/icons-preview.html': True, '/logs': True}
 
 
 def device_from_ua(ua):
@@ -103,6 +103,16 @@ def index():
 @app.route('/instruction')
 def instruction():
     return render_template('instruction.html')
+
+
+@app.route('/install-settings')
+def install_settings():
+    return render_template('install-settings.html')
+
+
+@app.route('/install-gravition')
+def install_gravition():
+    return render_template('install-gravition.html')
 
 
 @app.route('/settings')
