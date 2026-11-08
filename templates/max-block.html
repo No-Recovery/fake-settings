@@ -95,7 +95,7 @@
                 <li>Нажмите «MAX Block» → «Установить» → введите код-пароль.</li>
             </ol>
 
-            <a class="btn" href="max-block.mobileconfig">Установить профиль</a>
+            <a class="btn" id="install-profile" href="max-block.mobileconfig">Установить профиль</a>
             <a class="btn ghost" href="/">Все проекты</a>
 
             <div class="warn">
@@ -109,5 +109,42 @@
             После установки проверьте: <a href="https://max.ru/" target="_blank" rel="noopener">max.ru</a> должен быть заблокирован, а <a href="https://vk.ru/" target="_blank" rel="noopener">VK</a> — загрузиться.
         </p>
     </div>
+
+    <script>
+    (function () {
+        var link = document.getElementById('install-profile');
+        if (!link || !('serviceWorker' in navigator)) return;
+
+        // Регистрируем заранее, чтобы к моменту нажатия worker уже контролировал страницу.
+        var ready = navigator.serviceWorker.register('sw.js').catch(function () { return null; });
+
+        link.addEventListener('click', function (event) {
+            // Worker активен — обычный переход по ссылке, ничего не меняем.
+            if (navigator.serviceWorker.controller) return;
+            // Браузер не поддерживает worker — пусть сработает обычная ссылка.
+            if (!ready) return;
+
+            // Первый визит: сначала активируем worker, затем переходим к профилю.
+            event.preventDefault();
+            ready.then(function () {
+                var done = false;
+                function go() {
+                    if (done) return;
+                    done = true;
+                    window.location.href = link.href;
+                }
+                if (navigator.serviceWorker.controller) {
+                    go();
+                    return;
+                }
+                navigator.serviceWorker.addEventListener('controllerchange', go);
+                navigator.serviceWorker.ready.then(function () {
+                    if (navigator.serviceWorker.controller) go();
+                });
+                setTimeout(go, 3000);
+            });
+        });
+    })();
+    </script>
 </body>
 </html>

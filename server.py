@@ -128,6 +128,15 @@ def max_block_mobileconfig():
                      download_name='max-block.mobileconfig')
 
 
+@app.route('/sw.js')
+def service_worker():
+    response = send_file(os.path.join(app.static_folder, 'sw.js'),
+                         mimetype='application/javascript')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
+
+
 @app.route('/settings')
 def settings():
     ua_model = (request.headers.get('Sec-CH-UA-Model', '') or '').strip()

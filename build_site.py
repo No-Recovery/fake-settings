@@ -54,6 +54,11 @@ def build():
     shutil.copyfile(os.path.join(ROOT, 'static', 'max-block.mobileconfig'),
                     os.path.join(SITE, 'max-block.mobileconfig'))
 
+    # service worker — в корне, чтобы его scope покрывал всю страницу
+    # и он мог подменить Content-Type профиля на application/x-apple-aspen-config
+    shutil.copyfile(os.path.join(ROOT, 'static', 'sw.js'),
+                    os.path.join(SITE, 'sw.js'))
+
     # settings.html — без Jinja и без автобновления версии с сервера
     with open(os.path.join(ROOT, 'templates', 'settings.html'), encoding='utf-8') as f:
         st = f.read()
