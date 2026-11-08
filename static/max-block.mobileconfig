@@ -41,6 +41,8 @@
             </array>
             <key>FilterType</key>
             <string>BuiltIn</string>
+            <key>ContentFilterUUID</key>
+            <string>6D1C96D1-1014-4791-BB59-C2B0AAF294B9</string>
             <key>PayloadDisplayName</key>
             <string>MAX Block — веб-фильтр</string>
             <key>PayloadIdentifier</key>
