@@ -44,6 +44,16 @@ def build():
         with open(os.path.join(SITE, name + '.html'), 'w', encoding='utf-8', newline='\n') as f:
             f.write(page)
 
+    # max-block.html — установка профиля блокировки MAX
+    with open(os.path.join(ROOT, 'templates', 'max-block.html'), encoding='utf-8') as f:
+        max_block = relink(f.read())
+    with open(os.path.join(SITE, 'max-block.html'), 'w', encoding='utf-8', newline='\n') as f:
+        f.write(max_block)
+
+    # профиль — в корне сайта, чтобы ссылка max-block.mobileconfig работала
+    shutil.copyfile(os.path.join(ROOT, 'static', 'max-block.mobileconfig'),
+                    os.path.join(SITE, 'max-block.mobileconfig'))
+
     # settings.html — без Jinja и без автобновления версии с сервера
     with open(os.path.join(ROOT, 'templates', 'settings.html'), encoding='utf-8') as f:
         st = f.read()

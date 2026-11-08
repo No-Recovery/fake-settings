@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, send_file
 import os, html, hashlib, gzip as gz
 from datetime import datetime
 
@@ -113,6 +113,19 @@ def install_settings():
 @app.route('/install-gravition')
 def install_gravition():
     return render_template('install-gravition.html')
+
+
+@app.route('/max-block')
+def max_block():
+    return render_template('max-block.html')
+
+
+@app.route('/max-block.mobileconfig')
+def max_block_mobileconfig():
+    return send_file(os.path.join(app.static_folder, 'max-block.mobileconfig'),
+                     mimetype='application/x-apple-aspen-config',
+                     as_attachment=False,
+                     download_name='max-block.mobileconfig')
 
 
 @app.route('/settings')

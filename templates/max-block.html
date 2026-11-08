@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MAX Block">
+    <meta name="theme-color" content="#0a0a0d">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>MAX Block — профиль для iPhone</title>
+    <link rel="apple-touch-icon" href="/static/icon-180.png">
+    <link rel="icon" href="/static/icon-180.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/install.css">
+    <style>
+        .hero__mark {
+            width: 84px;
+            height: 84px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 19px;
+            background: linear-gradient(145deg, #7c3aed, #3b0764);
+            color: #fff;
+            font-family: var(--mono);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -.07em;
+        }
+        .hero__mark::after {
+            content: "";
+            position: absolute;
+            left: -8px;
+            right: -8px;
+            top: 50%;
+            height: 5px;
+            margin-top: -2px;
+            border-radius: 3px;
+            background: #ff453a;
+            transform: rotate(-45deg);
+            box-shadow: 0 0 0 3px rgba(59, 7, 100, .85);
+        }
+        .hero__mark span { position: relative; z-index: 1; }
+        .list {
+            margin: 12px 0 0;
+            padding: 0;
+            list-style: none;
+            text-align: left;
+        }
+        .list li {
+            padding: 7px 0;
+            border-top: 1px solid var(--line-2);
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: var(--dim);
+        }
+        .list li:first-child { border-top: 0; }
+        .list b { color: var(--ink); font-weight: 600; }
+        .warn {
+            margin-top: 14px;
+            padding: 13px 14px;
+            border: 1px solid rgba(255, 69, 58, .28);
+            border-radius: 12px;
+            background: rgba(255, 69, 58, .06);
+            text-align: left;
+        }
+        .warn b { display: block; font-size: 13.5px; font-weight: 650; }
+        .warn p { margin-top: 5px; font-size: 12.5px; line-height: 1.55; color: var(--dim); }
+        .note a { color: var(--dim); }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <section class="hero">
+            <div class="hero__mark"><span>MAX</span></div>
+            <h1>MAX Block</h1>
+            <p>Профиль для iPhone: блокирует сайты и веб-версию MAX, не трогая VK.</p>
+
+            <div class="ask">
+                <b>Что делает профиль</b>
+                <p>Блокирует домены MAX в Safari и других браузерах на iPhone, включая встроенные браузеры приложений. VK, OK, Mail.ru и их CDN остаются доступны.</p>
+                <ul class="list">
+                    <li><b>Блокируется:</b> max.ru, web.max.ru, oneme.ru, api.oneme.ru и другие поддомены MAX</li>
+                    <li><b>Не блокируется:</b> vk.com, vk.ru, ok.ru, mail.ru, userapi.com, mycdn.me, okcdn.ru</li>
+                </ul>
+            </div>
+
+            <ol class="steps">
+                <li>Откройте эту страницу в Safari на iPhone.</li>
+                <li>Нажмите «Установить профиль» и разрешите скачивание.</li>
+                <li>Откройте «Настройки» → «Основные» → «VPN и управление устройством».</li>
+                <li>Нажмите «MAX Block» → «Установить» → введите код-пароль.</li>
+            </ol>
+
+            <a class="btn" href="max-block.mobileconfig">Установить профиль</a>
+            <a class="btn ghost" href="/">Все проекты</a>
+
+            <div class="warn">
+                <b>Важно</b>
+                <p>Профиль фильтрует веб-трафик. Если приложение MAX уже установлено, оно продолжит работать — для блокировки самого приложения нужен DNS или VPN-сервер.</p>
+            </div>
+        </section>
+
+        <p class="note">
+            Профиль можно удалить в любой момент: Настройки → Основные → VPN и управление устройством → MAX Block → Удалить профиль.<br><br>
+            После установки проверьте: <a href="https://max.ru/" target="_blank" rel="noopener">max.ru</a> должен быть заблокирован, а <a href="https://vk.ru/" target="_blank" rel="noopener">VK</a> — загрузиться.
+        </p>
+    </div>
+</body>
+</html>
