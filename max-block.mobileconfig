@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>DenyListURLs</key>
+            <array>
+                <string>https://max.ru/</string>
+                <string>http://max.ru/</string>
+                <string>https://www.max.ru/</string>
+                <string>http://www.max.ru/</string>
+                <string>https://web.max.ru/</string>
+                <string>https://st.max.ru/</string>
+                <string>https://api.max.ru/</string>
+                <string>https://platform-api.max.ru/</string>
+                <string>https://platform-api2.max.ru/</string>
+                <string>https://dev.max.ru/</string>
+                <string>https://help.max.ru/</string>
+                <string>https://cdn.max.ru/</string>
+                <string>https://media.max.ru/</string>
+                <string>https://static.max.ru/</string>
+                <string>https://ws.max.ru/</string>
+                <string>https://ws-api.max.ru/</string>
+                <string>https://m.max.ru/</string>
+                <string>https://id.max.ru/</string>
+                <string>https://auth.max.ru/</string>
+                <string>https://links.max.ru/</string>
+                <string>https://go.max.ru/</string>
+                <string>.max.ru</string>
+                <string>https://oneme.ru/</string>
+                <string>http://oneme.ru/</string>
+                <string>https://www.oneme.ru/</string>
+                <string>http://www.oneme.ru/</string>
+                <string>https://api.oneme.ru/</string>
+                <string>https://fd.oneme.ru/</string>
+                <string>https://i.oneme.ru/</string>
+                <string>https://ws-api.oneme.ru/</string>
+                <string>.oneme.ru</string>
+            </array>
+            <key>FilterType</key>
+            <string>BuiltIn</string>
+            <key>ContentFilterUUID</key>
+            <string>6D1C96D1-1014-4791-BB59-C2B0AAF294B9</string>
+            <key>PayloadDisplayName</key>
+            <string>MAX Block — веб-фильтр</string>
+            <key>PayloadIdentifier</key>
+            <string>ru.vo1dek.max-block.webcontentfilter</string>
+            <key>PayloadType</key>
+            <string>com.apple.webcontent-filter</string>
+            <key>PayloadUUID</key>
+            <string>5C095474-EA56-4E44-938F-D13BDE933662</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+        </dict>
+    </array>
+    <key>PayloadDescription</key>
+    <string>Блокирует сайты и веб-версию мессенджера MAX (max.ru, oneme.ru) в Safari и других браузерах на iPhone. VK, OK, Mail.ru и их CDN не блокируются.</string>
+    <key>PayloadDisplayName</key>
+    <string>MAX Block</string>
+    <key>PayloadIdentifier</key>
+    <string>ru.vo1dek.max-block</string>
+    <key>PayloadOrganization</key>
+    <string>TGK @Vo1dekA12</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>7DA2BEDF-ACDD-4F60-A8BC-5B7717C41C32</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Иконки 2 слайда — превью</title>
+<style>
+    body{margin:0;background:#000;color:#fff;font-family:-apple-system,sans-serif;padding:18px}
+    h1{font-size:19px;font-weight:800;margin:0 0 4px}
+    p{color:#8e8e93;font-size:12px;margin:0 0 14px}
+    .tile{display:inline-block;background:#1c1c1e;border-radius:14px;padding:14px;margin:6px;text-align:center;width:150px;vertical-align:top}
+    .tile img{width:100px;height:100px;object-fit:contain;display:block;margin:0 auto 8px}
+    .tile .tag{font-size:11px;color:#8e8e93}
+    .tile .n{font-size:13px;font-weight:700;color:#ffd60a}
+    .tile.dim{opacity:.45}
+</style>
+</head>
+<body>
+<h1>Иконки «2 слайда»</h1>
+<p>Точное соответствие иконок второго фото строкам группы 2. Свапы по указанию пользователя выполнены: Основные↔Обои, Универсальный доступ↔Экран и яркость, Камера↔Оформление, Режим ожидания↔Экран «Домой», ниже_9 → Siri.</p>
+<div id="grid"></div>
+<script>
+    var items = [
+        ['below_2', 'Обои (было «Основные»)'],
+        ['below_8', 'Экран и яркость (было «Универсальный доступ»)'],
+        ['below_3', 'Оформление (было «Камера»)'],
+        ['below_1', 'Кнопка действия'],
+        ['below_4', 'Поиск'],
+        ['below_5', 'Пункт управления'],
+        ['below_7', 'Экран «Домой» и библиотека приложений (было «Режим ожидания»)'],
+        ['below_62', 'Режим ожидания (было «Экран «Домой»»)'],
+        ['below_61', 'Универсальный доступ (было «Экран и яркость»)'],
+        ['below_9', 'Siri (раньше «не используется»)'],
+        ['general2', 'из «настройки и унивдоступ.jpg» — Основные (шестерёнка)'],
+        ['access2', 'из «настройки и унивдоступ.jpg» — Универсальный доступ (человек в круге)']
+    ];
+    var g = document.getElementById('grid');
+    items.forEach(function (it) {
+        var t = document.createElement('div');
+        t.className = 'tile' + (it[1].indexOf('не') === 0 ? ' dim' : '');
+        t.innerHTML = '<img src="/static/icons2/' + it[0] + '.png" alt=""><div class="tag">' + it[1] + '</div>';
+        g.appendChild(t);
+    });
+</script>
+</body>
+</html>

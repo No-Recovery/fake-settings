@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gravition">
+    <meta name="theme-color" content="#0a0a0d">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Gravition — установка</title>
+    <link rel="apple-touch-icon" href="static/gravition-180.png">
+    <link rel="icon" href="static/gravition-180.png" type="image/png">
+    <link rel="stylesheet" href="static/css/install.css">
+</head>
+<body>
+    <div class="wrap">
+        <nav class="switch" aria-label="Проекты">
+            <a href="install-settings.html">Fake Settings</a>
+            <a href="install-gravition.html" aria-current="page">Gravition</a>
+        </nav>
+
+        <section class="hero">
+            <img class="hero__ic" src="static/gravition-180.png" alt="">
+            <h1>Gravition</h1>
+            <p>Твик с падающими иконками</p>
+
+            <div class="ask">
+                <b>Добавьте веб-вкладку «Gravition» на экран «Домой»</b>
+                <p>Добавляйте именно эту страницу: тогда на рабочем столе появится иконка Gravition, а приложение откроется во весь экран, без адресной строки.</p>
+            </div>
+
+            <ol class="steps">
+                <li>Нажмите «Поделиться» внизу Safari.</li>
+                <li>Выберите «На экран «Домой»».</li>
+                <li>Нажмите «Добавить» — на рабочем столе появится Gravition.</li>
+            </ol>
+
+            <a class="btn" href="static/gravition/index.html">Открыть Gravition</a>
+            <a class="btn ghost" href="index.html">Все проекты</a>
+        </section>
+
+        <p class="note">После добавления эта страница будет сразу открывать Gravition.</p>
+    </div>
+
+    <script>
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            location.replace('static/gravition/index.html');
+        }
+    </script>
+</body>
+</html>

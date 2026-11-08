@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fake Settings">
+    <meta name="theme-color" content="#0a0a0d">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Fake Settings — установка</title>
+    <link rel="apple-touch-icon" href="static/icon-180.png">
+    <link rel="icon" href="static/icon-180.png" type="image/png">
+    <link rel="stylesheet" href="static/css/install.css">
+</head>
+<body>
+    <div class="wrap">
+        <nav class="switch" aria-label="Проекты">
+            <a href="install-settings.html" aria-current="page">Fake Settings</a>
+            <a href="install-gravition.html">Gravition</a>
+        </nav>
+
+        <section class="hero">
+            <img class="hero__ic" src="static/icon-180.png" alt="">
+            <h1>Fake Settings</h1>
+            <p>Настройки iPhone в браузере</p>
+
+            <div class="ask">
+                <b>Добавьте веб-вкладку «Fake Settings» на экран «Домой»</b>
+                <p>Добавляйте именно эту страницу: тогда на рабочем столе появится иконка Fake Settings и приложение будет открываться без адресной строки.</p>
+            </div>
+
+            <ol class="steps">
+                <li>Нажмите «Поделиться» внизу Safari.</li>
+                <li>Выберите «На экран «Домой»».</li>
+                <li>Нажмите «Добавить» — на рабочем столе появится Fake Settings.</li>
+            </ol>
+
+            <a class="btn" href="settings.html">Открыть Fake Settings</a>
+            <a class="btn ghost" href="index.html">Все проекты</a>
+        </section>
+
+        <p class="note">После добавления эта страница будет сразу открывать настройки.</p>
+    </div>
+
+    <script>
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            location.replace('settings.html');
+        }
+    </script>
+</body>
+</html>
